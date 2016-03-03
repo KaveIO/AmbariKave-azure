@@ -3,12 +3,8 @@ In this repo we contain publishable azure deployments of the AmbariKave. Current
 
 The goal is to make the environment provisionable via a provision button. This will only work with these buttons: 
 
-<a href="xxxx" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
-<a href="xxxx" target="_blank">
-    <img src="http://armviz.io/visualizebutton.png"/>
-</a>
+[![deploy](img/deploybutton.png)]()
+[![deploy](img/visualizebutton.png)]()
 
 Currently that won't work since the installation of the associated blueprint isn't automated. Here is the reference HTML we have to provide:
 
@@ -20,6 +16,13 @@ Currently that won't work since the installation of the associated blueprint isn
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 ``` 
+
+However we have to do that in a way both gitlabs and github understand. Currently we use the following: 
+
+```md
+[![deploy](img/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-quickstart-templates%2Fmaster%2F101-application-gateway-create%2Fazuredeploy.json)
+[![deploy](img/visualizebutton.png)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-quickstart-templates%2Fmaster%2F101-application-gateway-create%2Fazuredeploy.json)
+```
 
 ## Getting the azure-cli 
 There are many ways to get the azure-cli. Just google it.. Options I've seen: 
