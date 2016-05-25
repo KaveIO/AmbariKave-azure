@@ -34,6 +34,11 @@ azure group create -n Kave-Test -l "westeurope"
 azure group deployment create -f <PathToTemplate> -e <PathToProperties> -g Kave-Test -n KaveTestDeployment
 ```
 
+## Useful links WIP
 
+https://github.com/Azure/azure-rest-api-specs
+https://msdn.microsoft.com/en-us/library/azure/mt163564.aspx
+https://github.com/Azure/azure-quickstart-templates
+http://azureplatform.azurewebsites.net/
 
 

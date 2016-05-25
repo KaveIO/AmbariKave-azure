@@ -122,7 +122,9 @@
 	},
 	"variables": {
 		"location": "[resourceGroup().location]",
-		"apiVersion": "2015-06-15",
+		"apiVersionStorage": "2016-01-01",
+		"apiVersionNetwork": "2016-03-30",
+		"apiVersionCompute": "2016-03-30",
 		"KAVEnetworkSubnet1Name": "Subnet-1",
 		"KAVEnetworkSubnet1Prefix": "[parameters('KAVENetworkSubnet')]",
 		"KAVEImagePublisher": "OpenLogic",
@@ -138,6 +140,9 @@
 		"KAVEStorageAccountContainerName": "vhds",
 		"KAVEStdStorageType": "Standard_LRS",
 		"KAVEPrmStorageType": "Premium_LRS",
+		"KAVEStdStorageKind": "Storage",
+		"KAVEPrmStorageKind": "BlobStorage",
+		"KAVEPrmStorageAccessTier": "Cool",
 		"publicIPAddressName": "KAVEPublicIP",
 		"publicIPAddressType": "Static",
 		"extensionName": "/setup",
@@ -168,38 +173,47 @@
 		"dataNodeExtraDisk": "/dev/sdc",
 		"nnoNodeExtraDisk": "/dev/sdc",
 		"gateMountPoint": "/data",
+<<<<<<< 3f0c019c8028b5ea6116bc1e9942b2a5aeafac01
 	  "dataNodeMountPoint": "/hadoop",
 	  "nnoNodeMountPoint": "/hadoop"
+=======
+		"dataNodeMountPoint": "/hadoop"
+>>>>>>> Compliant ARM template | Useful links
 	},
 	"resources": [{
 		"name": "[parameters('saName')]",
 		"type": "Microsoft.Storage/storageAccounts",
 		"location": "[variables('location')]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionStorage')]",
 		"dependsOn": [],
 		"tags": {
 			"displayName": "saKAVE01"
 		},
-		"properties": {
-			"accountType": "[variables('KAVEStdStorageType')]"
-		}
+		"sku": {
+			"name": "[variables('KAVEStdStorageType')]"
+		},
+		"kind": "[variables('KAVEStdStorageKind')]"
 	}, {
 		"name": "[parameters('saPremiumName')]",
 		"type": "Microsoft.Storage/storageAccounts",
 		"location": "[variables('location')]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionStorage')]",
 		"dependsOn": [],
+		"properties": {
+			"accessTier": "[variables('KAVEPrmStorageAccessTier')]"
+		},
 		"tags": {
 			"displayName": "saKAVE01Premium"
 		},
-		"properties": {
-			"accountType": "[variables('KAVEPrmStorageType')]"
-		}
+		"sku": {
+			"name": "[variables('KAVEPrmStorageType')]"
+		},
+		"kind": "[variables('KAVEPrmStorageKind')]"
 	}, {
 		"name": "KAVEnetwork",
 		"type": "Microsoft.Network/virtualNetworks",
 		"location": "[variables('location')]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionNetwork')]",
 		"dependsOn": [],
 		"tags": {
 			"displayName": "KAVEnetwork"
@@ -218,7 +232,7 @@
 			}]
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionNetwork')]",
 		"type": "Microsoft.Network/publicIPAddresses",
 		"name": "[variables('publicIPAddressName')]",
 		"location": "[variables('location')]",
@@ -232,7 +246,7 @@
 		"name": "[variables('AmbariNicName')]",
 		"type": "Microsoft.Network/networkInterfaces",
 		"location": "[variables('location')]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionNetwork')]",
 		"dependsOn": [
 			"[concat('Microsoft.Network/virtualNetworks/', 'KAVEnetwork')]"
 		],
@@ -251,7 +265,7 @@
 			}]
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionNetwork')]",
 		"type": "Microsoft.Network/networkInterfaces",
 		"name": "[variables('GatewayNicName')]",
 		"location": "[variables('location')]",
@@ -276,7 +290,7 @@
 			}]
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionNetwork')]",
 		"type": "Microsoft.Network/networkInterfaces",
 		"name": "[variables('CiNicName')]",
 		"location": "[variables('location')]",
@@ -298,7 +312,7 @@
 			}]
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionNetwork')]",
 		"type": "Microsoft.Network/networkInterfaces",
 		"name": "[concat(variables('NnoNicName'),copyIndex())]",
 		"location": "[variables('location')]",
@@ -324,7 +338,7 @@
 			}]
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionNetwork')]",
 		"type": "Microsoft.Network/networkInterfaces",
 		"name": "[concat(variables('DataNicName'), copyIndex())]",
 		"location": "[variables('location')]",
@@ -350,7 +364,7 @@
 			}]
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"name": "[parameters('GatewayNodeName')]",
 		"type": "Microsoft.Compute/virtualMachines",
 		"location": "[variables('location')]",
@@ -393,7 +407,7 @@
 			}
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"name": "[parameters('CiNodeName')]",
 		"type": "Microsoft.Compute/virtualMachines",
 		"location": "[variables('location')]",
@@ -436,7 +450,7 @@
 			}
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"name": "[concat(parameters('NnoNodeName'),'-',copyIndex())]",
 		"type": "Microsoft.Compute/virtualMachines",
 		"location": "[variables('location')]",
@@ -483,7 +497,7 @@
 			}
 		}
 	}, {
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"name": "[concat(parameters('DataNodeName'),'-',copyIndex())]",
 		"type": "Microsoft.Compute/virtualMachines",
 		"location": "[variables('location')]",
@@ -543,7 +557,7 @@
 		"name": "[parameters('AmbariNodeName')]",
 		"type": "Microsoft.Compute/virtualMachines",
 		"location": "[variables('location')]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"dependsOn": [
 			"[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
 			"[concat('Microsoft.Network/networkInterfaces/', variables('AmbariNicName'))]",
@@ -590,7 +604,7 @@
 	}, {
 		"type": "Microsoft.Compute/virtualMachines/extensions",
 		"name": "[concat(parameters('AmbariNodeName'), variables('extensionName'))]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"location": "[variables('location')]",
 		"dependsOn": [
 			"[concat('Microsoft.Compute/virtualMachines/', parameters('AmbariNodeName'))]"
@@ -600,14 +614,16 @@
 			"type": "CustomScriptForLinux",
 			"typeHandlerVersion": "1.4",
 			"settings": {
-				"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('ambariNodeSetupURI')), ' ')]",
+				"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('ambariNodeSetupURI')), ' ')]"
+			},
+			"protectedSettings": {
 				"commandToExecute": "[concat(variables('commandToExecuteAmbariNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('nodes'),' ',variables('version'),' ',variables('kaveBlueprint'),' ',variables('kaveCluster'))]"
 			}
 		}
 	}, {
 		"type": "Microsoft.Compute/virtualMachines/extensions",
 		"name": "[concat(parameters('GatewayNodeName'), variables('extensionName'))]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"location": "[variables('location')]",
 		"dependsOn": [
 			"[concat('Microsoft.Compute/virtualMachines/', parameters('GatewayNodeName'))]"
@@ -617,14 +633,21 @@
 			"type": "CustomScriptForLinux",
 			"typeHandlerVersion": "1.4",
 			"settings": {
+<<<<<<< 3f0c019c8028b5ea6116bc1e9942b2a5aeafac01
 				"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]",
 				"commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
+=======
+				"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI')), ' ')]"
+			},
+			"protectedSettings": {
+				"commandToExecute": "[concat(variables('commandToExecuteExtraDiskNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"
+>>>>>>> Compliant ARM template | Useful links
 			}
 		}
 	}, {
 		"type": "Microsoft.Compute/virtualMachines/extensions",
 		"name": "[concat(parameters('DataNodeName'),'-',copyIndex(),variables('extensionName'))]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"location": "[variables('location')]",
 		"copy": {
 			"name": "DataMachineScriptLoop",
@@ -638,14 +661,16 @@
 			"type": "CustomScriptForLinux",
 			"typeHandlerVersion": "1.4",
 			"settings": {
-				"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI')), ' ')]",
+				"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI')), ' ')]"
+			},
+			"protectedSettings": {
 				"commandToExecute": "[concat(variables('commandToExecuteExtraDiskNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('dataNodeExtraDisk'),' ',variables('dataNodeMountPoint'))]"
 			}
 		}
 	}, {
 		"type": "Microsoft.Compute/virtualMachines/extensions",
 		"name": "[concat(parameters('NnoNodeName'),'-',copyIndex(),variables('extensionName'))]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"location": "[variables('location')]",
 		"copy": {
 			"name": "NnoMachineScriptLoop",
@@ -659,14 +684,16 @@
 			"type": "CustomScriptForLinux",
 			"typeHandlerVersion": "1.4",
 			"settings": {
-				"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]",
+				"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]"
+			},
+			"protectedSettings": {
 				"commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
 			}
 		}
 	}, {
 		"type": "Microsoft.Compute/virtualMachines/extensions",
 		"name": "[concat(parameters('CiNodeName'), variables('extensionName'))]",
-		"apiVersion": "[variables('apiVersion')]",
+		"apiVersion": "[variables('apiVersionCompute')]",
 		"location": "[variables('location')]",
 		"dependsOn": [
 			"[concat('Microsoft.Compute/virtualMachines/', parameters('CiNodeName'))]"
@@ -676,10 +703,18 @@
 			"type": "CustomScriptForLinux",
 			"typeHandlerVersion": "1.4",
 			"settings": {
-				"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]",
+				"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]"
+			},
+			"protectedSettings": {
 				"commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
 			}
 		}
 	}],
-	"outputs": {}
+	"outputs": {
+		"fqdn": {
+			"value": "[reference(resourceId('Microsoft.Network/publicIPAddresses','KAVEPublicIP')).dnsSettings.fqdn]",
+			"type": "string"
+		}
+	}
+
 }
