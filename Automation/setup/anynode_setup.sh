@@ -53,6 +53,17 @@ function configure_swap {
     echo -e "$swapfile\tnone\tswap\tsw\t0\t0" >> /etc/fstab
 }
 
+function update_hostname {
+    # The FreeIPA client installation depends on `uname -n` to provide a fqdn. This script updates your 
+    # /etc/sysconfig/network file so the hostname there matches your fqdn.  
+
+   file="/etc/sysconfig/network"
+   hostname=`hostname -s`
+   fqdn=`hostname -f`
+
+   sed -i "s/^HOSTNAME=$hostname$/HOSTNAME=$fqdn/g" $file
+}
+
 setup_repo
 
 install_packages
@@ -60,3 +71,6 @@ install_packages
 change_rootpass
 
 configure_swap
+
+update_hostname
+
