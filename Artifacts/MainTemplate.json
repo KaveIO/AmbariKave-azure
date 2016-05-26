@@ -136,7 +136,8 @@
 		"NnoNicName": "[concat(parameters('NnoNodeName'), 'NiC')]",
 		"DataNicName": "[concat(parameters('DataNodeName'), 'NiC')]",
 		"KAVEVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'KAVEnetwork')]",
-		"KAVESubnetRef": "[concat(variables('KAVEVnetID'), '/subnets/', variables('KAVEnetworkSubnet1Name'))]",
+	      "KAVESubnetRef": "[concat(variables('KAVEVnetID'), '/subnets/', variables('KAVEnetworkSubnet1Name'))]",
+	        "publicNetworkSecurityGroupsName": "KAVEPublicSecurityGroup",
 		"KAVEStorageAccountContainerName": "vhds",
 		"KAVEStdStorageType": "Standard_LRS",
 		"KAVEPrmStorageType": "Premium_LRS",
@@ -270,7 +271,9 @@
 		"name": "[variables('GatewayNicName')]",
 		"location": "[variables('location')]",
 		"dependsOn": [
-			"[concat('Microsoft.Network/virtualNetworks/', 'KAVEnetwork')]"
+		    "[concat('Microsoft.Network/virtualNetworks/', 'KAVEnetwork')]",
+		    "[concat('Microsoft.Network/virtualNetworks/', 'KAVEnetwork')]",
+		    "[resourceId('Microsoft.Network/networkSecurityGroups', variables('publicNetworkSecurityGroupsName'))]"
 		],
 		"tags": {
 			"displayName": "[variables('GatewayNicName')]"
@@ -287,7 +290,10 @@
 						"id": "[variables('KAVESubnetRef')]"
 					}
 				}
-			}]
+			}],
+		    "networkSecurityGroup": {
+        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('publicNetworkSecurityGroupsName'))]"
+      }
 		}
 	}, {
 		"apiVersion": "[variables('apiVersionNetwork')]",
@@ -363,7 +369,31 @@
 				}
 			}]
 		}
-	}, {
+	},
+
+{
+    "type": "Microsoft.Network/networkSecurityGroups",
+    "name": "[variables('publicNetworkSecurityGroupsName')]",
+    "apiVersion": "[variables('apiVersionNetwork')]",
+    "location": "[variables('location')]",
+    "properties": {
+      "securityRules": [{
+        "name": "SSH",
+        "properties": {
+          "protocol": "Tcp",
+          "sourcePortRange": "*",
+          "destinationPortRange": "22",
+          "sourceAddressPrefix": "*",
+          "destinationAddressPrefix": "*",
+          "access": "Allow",
+          "priority": 100,
+          "direction": "Inbound"
+        }
+      }]
+    },
+    "dependsOn": []
+},
+		      {
 		"apiVersion": "[variables('apiVersionCompute')]",
 		"name": "[parameters('GatewayNodeName')]",
 		"type": "Microsoft.Compute/virtualMachines",
