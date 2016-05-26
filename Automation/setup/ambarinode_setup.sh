@@ -36,7 +36,7 @@ function distribute_keys {
 function customize_hosts {
     $BIN_DIR/create_hostsfile.sh "$WORKING_DIR" "$HOSTS"
 
-    pdcp -w "$csvhosts" "$WORKING_DIR/hosts" /etc/hosts
+    pdcp -w "$CSVHOSTS" "$WORKING_DIR/hosts" /etc/hosts
 }
 
 function localize_cluster_file {
@@ -65,18 +65,17 @@ function wait_for_ambari {
 }
 
 function blueprint_deploy {
-    $BIN_DIR/blueprint_deploy.sh "$VERSION" "$KAVE_BLUEPRINT" "$KAVE_CLUSTER.local"
+     $BIN_DIR/blueprint_deploy.sh "$VERSION" "$KAVE_BLUEPRINT" "$KAVE_CLUSTER.local" "$WORKING_DIR"
 
-    # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation
-    # status. This lets us be certain that the installation is well under way. 
+    # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way. 
     sleep 600
 
-    while installation_status && [ "$INSTALATION_STATUS" = "working" ] ;  do
-        echo $INSTALATION_STATUS
+    while installation_status && [ "$INSTALLATION_STATUS" = "working" ] ;  do
+        echo $INSTALLATION_STATUS
         sleep 5
     done
 
-    if [ "$INSTALATION_STATUS" = "done" ]; then
+    if [ "$INSTALLATION_STATUS" = "done" ]; then
        echo "No Criticals detected. The installation appears to be successful!"
     else
        echo "Installation loop broken, installation possibly failed. Exiting."
@@ -85,16 +84,16 @@ function blueprint_deploy {
 }
 
 function installation_status {
-    INSTALATION_STATUS_MESSAGE=$(curl --user admin:admin http://localhost:8080/api/v1/clusters/cluster/?fields=alerts_summary/* 2> /dev/null)
+    INSTALLATION_STATUS_MESSAGE=$(curl --user admin:admin http://localhost:8080/api/v1/clusters/cluster/?fields=alerts_summary/* 2> /dev/null)
     EXIT_STATUS=$?
 
     if [ $EXIT_STATUS -ne 0 ]; then
         return $EXIT_STATUS
     else
-        if [[ $INSTALATION_STATUS_MESSAGE =~ "\"CRITICAL\" : 0" ]]; then
-            INSTALATION_STATUS="done"
+        if [[ $INSTALLATION_STATUS_MESSAGE =~ "\"CRITICAL\" : 0" ]]; then
+            INSTALLATION_STATUS="done"
         else
-            INSTALATION_STATUS="working"
+            INSTALLATION_STATUS="working"
         fi
         return 0
     fi
@@ -105,7 +104,7 @@ function installation_status {
 
 anynode_setup
 
-csvhosts=$(echo "$HOSTS" | tr ' ' ,)
+CSVHOSTS=$(echo "$HOSTS" | tr ' ' ,)
 
 download_blueprint
 
