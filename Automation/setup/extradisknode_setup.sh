@@ -18,7 +18,7 @@ function anynode_setup {
 }
 
 function initialize_data_disk {
-    "$WORKING_DIR/$DESTDIR/setup/bin/initialize_data_disk.sh" "$DISK" "$MOUNT"
+    "$WORKING_DIR/$DESTDIR/Automation/setup/bin/initialize_data_disk.sh" "$DISK" "$MOUNT"
 }
 
 anynode_setup

@@ -24,7 +24,7 @@ function setup_repo {
 
     rm -rf "$WORKING_DIR"/temp "$WORKING_DIR/scripts.zip"
 
-    chmod -R +x "$WORKING_DIR/$DESTDIR/setup"
+    chmod -R +x "$WORKING_DIR/$DESTDIR/Automation/setup"
 }
 
 function install_packages {

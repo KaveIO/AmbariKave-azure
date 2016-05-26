@@ -109,7 +109,7 @@ csvhosts=$(echo "$HOSTS" | tr ' ' ,)
 
 download_blueprint
 
-BIN_DIR=$WORKING_DIR/$DESTDIR/setup/bin
+BIN_DIR=$WORKING_DIR/$DESTDIR/Automation/setup/bin
 
 distribute_keys
 
