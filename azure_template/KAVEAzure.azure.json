@@ -43,7 +43,7 @@
 		},
 		"AmbariNodeSize": {
 			"type": "string",
-			"defaultValue": "Standard_A1"
+			"defaultValue": "Standard_D2v2"
 		},
 		"GatewayNodeName": {
 			"type": "string",
@@ -55,7 +55,7 @@
 		},
 		"GatewayNodeSize": {
 			"type": "string",
-			"defaultValue": "Standard_DS3"
+			"defaultValue": "Standard_D4v2"
 		},
 		"CiNodeName": {
 			"type": "string",
@@ -67,7 +67,7 @@
 		},
 		"CiNodeSize": {
 			"type": "string",
-			"defaultValue": "Standard_DS3"
+			"defaultValue": "Standard_D2v2"
 		},
 		"NnoNodeName": {
 			"type": "string",
@@ -79,7 +79,7 @@
 		},
 		"NnoNodeSize": {
 			"type": "string",
-			"defaultValue": "Standard_DS3"
+			"defaultValue": "Standard_D4v2"
 		},
 		"NnoNodeCount": {
 			"type": "int",
@@ -95,7 +95,7 @@
 		},
 		"DataNodeSize": {
 			"type": "string",
-			"defaultValue": "Standard_DS2"
+			"defaultValue": "Standard_D4v2"
 		},
 		"DataNodeCount": {
 			"type": "int",
