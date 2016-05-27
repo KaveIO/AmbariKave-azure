@@ -95,7 +95,7 @@
 		},
 		"DataNodeSize": {
 			"type": "string",
-			"defaultValue": "Standard_D4_v2"
+			"defaultValue": "Standard_DS4_v2"
 		},
 		"DataNodeCount": {
 			"type": "int",
