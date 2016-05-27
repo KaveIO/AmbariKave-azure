@@ -377,15 +377,6 @@
 					"sku": "[parameters('KAVECentOSVersion')]",
 					"version": "latest"
 				},
-				"dataDisks": [{
-					"name": "[concat(parameters('GatewayNodeName'),'disk1')]",
-					"diskSizeGB": "100",
-					"lun": 0,
-					"vhd": {
-						"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('GatewayNodeName'), 'disk1', '.vhd')]"
-					},
-					"createOption": "Empty"
-				}],
 				"osDisk": {
 					"name": "[concat(parameters('GatewayNodeName'),'OSDisk')]",
 					"vhd": {
@@ -476,15 +467,6 @@
 					"sku": "[parameters('KAVECentOSVersion')]",
 					"version": "latest"
 				},
-				"dataDisks": [{
-					"name": "[concat(parameters('NnoNodeName'),copyIndex(),'disk1')]",
-					"diskSizeGB": "10",
-					"lun": 0,
-					"vhd": {
-						"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('NnoNodeName'), copyIndex(), 'disk1', '.vhd')]"
-					},
-					"createOption": "Empty"
-				}],
 				"osDisk": {
 					"name": "[concat(parameters('NnoNodeName'),copyIndex(), 'OSDisk')]",
 					"vhd": {
@@ -635,8 +617,8 @@
 			"type": "CustomScriptForLinux",
 			"typeHandlerVersion": "1.4",
 			"settings": {
-				"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI')), ' ')]",
-				"commandToExecute": "[concat(variables('commandToExecuteExtraDiskNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"
+				"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]",
+				"commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
 			}
 		}
 	}, {
@@ -677,8 +659,8 @@
 			"type": "CustomScriptForLinux",
 			"typeHandlerVersion": "1.4",
 			"settings": {
-				"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI')), ' ')]",
-				"commandToExecute": "[concat(variables('commandToExecuteExtraDiskNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('nnoNodeExtraDisk'),' ',variables('nnoNodeMountPoint'))]"
+				"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]",
+				"commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
 			}
 		}
 	}, {
