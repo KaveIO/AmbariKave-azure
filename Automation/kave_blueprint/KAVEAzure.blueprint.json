@@ -51,10 +51,13 @@
 			"mapreduce.task.io.sort.mb": "3686"
                 }
         }, {
+			"yarn.timeline-service.store-class": "org.apache.hadoop.yarn.server.timeline.LeveldbTimelineStore"
+		}
+	}, {
 		"freeipa": {
 			"ldap_bind_password": "testtestdirpass1234",
 			"directory_password": "testtestdirpass1234",
-			"initial_users_and_groups": "{\"Users\" : [\"someadmin\"], \"Groups\" : {\"admins\" : [\"someadmin\"]}}",
+			"initial_users_and_groups": "{\"Users\" : [\"<KAVE_ADMIN>\"], \"Groups\" : {\"admins\" : [\"<KAVE_ADMIN>\"], \"hadoop\" : [\"<KAVE_ADMIN>\"]}}",
 			"initial_user_passwords": "{\"someadmin\": \"ProbablySwimmingNearestDriver\"}"
 		}
 	}, {
@@ -95,32 +98,34 @@
 		"name": "gateway",
 		"configurations": [],
 		"components": [{
-				"name": "KAVETOOLBOXGATE"
-			}, {
-				"name": "HDFS_CLIENT"
-			}, {
-				"name": "YARN_CLIENT"
-			}, {
-				"name": "MAPREDUCE2_CLIENT"
-			}, {
-				"name": "KAVELANDING"
-			}, {
-				"name": "SQOOP"
-			}, {
-				"name": "HIVE_CLIENT"
-			}, {
-				"name": "TEZ_CLIENT"
-			}, {
-				"name": "FREEIPA_CLIENT"
-			}, {
-				"name": "ZOOKEEPER_CLIENT"
-			}, {
-				"name": "SONARQUBE_RUNNER"
-			}, {
-				"name": "METRICS_MONITOR"
-			}
-
-		],
+			"name": "KAVETOOLBOXGATE"
+		}, {
+			"name": "HDFS_CLIENT"
+		}, {
+			"name": "YARN_CLIENT"
+		}, {
+			"name": "MAPREDUCE2_CLIENT"
+		}, {
+			"name": "KAVELANDING"
+		}, {
+			"name": "SQOOP"
+		}, {
+			"name": "HIVE_CLIENT"
+		}, {
+			"name": "TEZ_CLIENT"
+		}, {
+			"name": "FREEIPA_CLIENT"
+		}, {
+			"name": "ZOOKEEPER_CLIENT"
+		}, {
+			"name": "SONARQUBE_RUNNER"
+		}, {
+			"name": "METRICS_MONITOR"
+		}, {
+			"name": "MONGODB_CLIENT"
+		}, {
+			"name": "SPARK_CLIENT"
+		}],
 		"cardinality": "0-10"
 	}, {
 		"name": "namenode-1",
@@ -162,10 +167,17 @@
 			"name": "FREEIPA_CLIENT"
 		}, {
 			"name": "METRICS_MONITOR"
+		}, {
+			"name": "SPARK_THRIFTSERVER"
 		}],
 		"cardinality": "1"
 	}, {
 		"name": "namenode-2",
+		"configurations": [{
+			"mongodb": {
+				"tcp_port": 29999
+			}
+		}],
 		"components": [{
 			"name": "SECONDARY_NAMENODE"
 		}, {
@@ -176,6 +188,10 @@
 			"name": "FREEIPA_CLIENT"
 		}, {
 			"name": "METRICS_MONITOR"
+		}, {
+			"name": "SPARK_JOBHISTORYSERVER"
+		}, {
+			"name": "MONGODB_MASTER"
 		}],
 		"cardinality": "1"
 	}, {
@@ -197,10 +213,15 @@
 		"configurations": [{
 			"sonarqube": {
 				"sonar_database_user_passwd": "admin"
+			},
+			"jboss": {
+				"http_port": 9999
 			}
 		}],
 		"components": [{
 			"name": "ARCHIVA_SERVER"
+		}, {
+			"name": "JBOSS_APP_SERVER"
 		}, {
 			"name": "TWIKI_SERVER"
 		}, {

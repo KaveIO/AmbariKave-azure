@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "KAVEAdminUserName": {
-            "value": "KaveAdmin"
+            "value": "kaveadmin"
         },
         "KAVEAdminPassword": {
             "value": "KavePassword01"

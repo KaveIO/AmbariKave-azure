@@ -20,13 +20,13 @@ function anynode_setup {
 }
 
 function download_blueprint {
-    wget -O "$WORKING_DIR/blueprint.json" "$KAVE_BLUEPRINT_URL"
+    wget -O "$WORKING_DIR/blueprint.json.template" "$KAVE_BLUEPRINT_URL"
 
-    wget -O "$WORKING_DIR/cluster.json" "$KAVE_CLUSTER_URL"
+    wget -O "$WORKING_DIR/cluster.json.template" "$KAVE_CLUSTER_URL"
 
-    KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/blueprint.json")
+    KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/blueprint.json.template")
 
-    KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/cluster.json")
+    KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/cluster.json.template")
 }
 
 function distribute_keys {
@@ -41,6 +41,10 @@ function customize_hosts {
 
 function localize_cluster_file {
     $BIN_DIR/localize_cluster_file.sh "$KAVE_CLUSTER"
+}
+
+function initialize_blueprint {
+    sed -r s/<KAVE_ADMIN>/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
 }
 
 function kave_install {
@@ -65,7 +69,7 @@ function wait_for_ambari {
 }
 
 function blueprint_deploy {
-     $BIN_DIR/blueprint_deploy.sh "$VERSION" "$KAVE_BLUEPRINT" "$KAVE_CLUSTER.local" "$WORKING_DIR"
+    $BIN_DIR/blueprint_deploy.sh "$VERSION" "${KAVE_BLUEPRINT%.*}" "${KAVE_CLUSTER%.*}" "$WORKING_DIR"
 
     # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way. 
     sleep 600
@@ -99,9 +103,6 @@ function installation_status {
     fi
 }
 
-
-
-
 anynode_setup
 
 CSVHOSTS=$(echo "$HOSTS" | tr ' ' ,)
@@ -115,6 +116,8 @@ distribute_keys
 customize_hosts
 
 localize_cluster_file
+
+initialize_blueprint
 
 kave_install
 

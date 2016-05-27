@@ -430,7 +430,19 @@
 						"priority": 100,
 						"direction": "Inbound"
 					}
-				}]
+				},
+						 {
+					"name": "VNC",
+					"properties": {
+						"protocol": "*",
+						"sourcePortRange": "*",
+						"destinationPortRange": "5900-5999",
+						"sourceAddressPrefix": "*",
+						"destinationAddressPrefix": "*",
+						"access": "Allow",
+						"priority": 101,
+						"direction": "Inbound"
+					}}]
 			},
 			"dependsOn": []
 		}, {
@@ -886,7 +898,7 @@
 				"type": "CustomScriptForLinux",
 				"typeHandlerVersion": "1.4",
 				"settings": {
-					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI')), ' ')]"
+					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI'),' ',variables('gatewaySetupURI')), ' ')]"
 				},
 				"protectedSettings": {
 					"commandToExecute": "[concat(variables('commandToExecuteExtraDiskNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"

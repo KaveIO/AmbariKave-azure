@@ -1,18 +1,17 @@
 {
 	"handler": "Microsoft.Compute.MultiVm",
     "version": "0.0.1-preview",
-    "testURL": "https://portal.azure.com/#blade/Microsoft_Azure_Compute/CreateMultiVmWizardBlade/interna
-l_bladeCallId/anything/internal_bladeCallerParams/{\"initialData\":{},\"providerConfig\":
-{\"createUiDefinition\":\"https://raw.githubusercontent.com/DataAnalyticsOrganization/AmbariKave-azure/master/Artifacts/CreateUiDefinition.json\"}}",
+    "testURL": "https://portal.azure.com/#blade/Microsoft_Azure_Compute/CreateMultiVmWizardBlade/internal_bladeCallId/anything/internal_bladeCallerParams/{\"initialData\":{},\"providerConfig\":{\"createUiDefinition\":\"https://raw.githubusercontent.com/DataAnalyticsOrganization/AmbariKave-azure/master/Artifacts/CreateUiDefinition.json\"}}",
 	"parameters": {
 		"basics": [{
 			"name": "KaveAdmin",
 			"type": "Microsoft.Compute.UserNameTextBox",
 			"label": "KAVEAdminUserName",
-			"defaultValue": "KaveAdmin",
+			"defaultValue": "kaveadmin",
 			"toolTip": "Enter the desired KAVE admin user name.",
 			"constraints": {
-				"required": true
+			    "required": true,
+			    "regex": "^[a-z]{6,32}$"
 			},
 			"osPlatform": "Linux",
 			"visible": true
