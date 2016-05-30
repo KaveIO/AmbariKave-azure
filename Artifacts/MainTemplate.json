@@ -156,14 +156,17 @@
 		"setupScriptsPath": "/Automation/setup/",
 		"anyNodeSetupScript": "anynode_setup.sh",
 		"ambariNodeSetupScript": "ambarinode_setup.sh",
-		"extraDiskNodeSetupScript": "extradisknode_setup.sh",
+	    "extraDiskNodeSetupScript": "extradisknode_setup.sh",
+	    "gatewaySetupScript": "gateway_setup.sh",
 		"anyNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('anyNodeSetupScript'))]",
 		"ambariNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('ambariNodeSetupScript'))]",
-		"extraDiskNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('extraDiskNodeSetupScript'))]",
+	    "extraDiskNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('extraDiskNodeSetupScript'))]",
+	    "gatewaySetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('gatewaySetupScript'))]",
 		"scriptInterpreter": "/bin/bash",
 		"commandToExecuteAnyNode": "[concat(variables('scriptInterpreter'), ' ', variables('anyNodeSetupScript'))]",
 		"commandToExecuteExtraDiskNode": "[concat(variables('scriptInterpreter'), ' ', variables('extraDiskNodeSetupScript'))]",
-		"commandToExecuteAmbariNode": "[concat(variables('scriptInterpreter'), ' ', variables('ambariNodeSetupScript'))]",
+	    "commandToExecuteAmbariNode": "[concat(variables('scriptInterpreter'), ' ', variables('ambariNodeSetupScript'))]",
+	    "commandToExecuteGateway": "[concat(variables('scriptInterpreter'), ' ', variables('gatewaySetupScript'))]",
 		"kaveScriptsURI": "[concat(variables('baseMainURI'),'archive/',variables('branchName'),'.zip')]",
 		"blueprintPath": "/Automation/kave_blueprint/",
 		"kaveBlueprint": "[concat(variables('baseContentURI'), variables('blueprintPath'), 'KAVEAzure.blueprint.json')]",
@@ -421,7 +424,7 @@
 				"securityRules": [{
 					"name": "SSH",
 					"properties": {
-						"protocol": "Tcp",
+						"protocol": "*",
 						"sourcePortRange": "*",
 						"destinationPortRange": "22",
 						"sourceAddressPrefix": "*",
@@ -901,7 +904,7 @@
 					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI'),' ',variables('gatewaySetupURI')), ' ')]"
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat(variables('commandToExecuteExtraDiskNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"
+					"commandToExecute": "[concat(variables('commandToExecuteGateway'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"
 				}
 >>>>>>> Fixing names and stuff
 			}

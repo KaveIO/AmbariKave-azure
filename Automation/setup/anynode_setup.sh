@@ -40,7 +40,7 @@ function change_rootpass {
 }
 
 function configure_swap {
-    swapfile=/mnt/resource/swap$SWAP_SIZE
+    local swapfile=/mnt/resource/swap$SWAP_SIZE
 
     fallocate -l "$SWAP_SIZE" "$swapfile"
 
@@ -57,9 +57,9 @@ function update_hostname {
     # The FreeIPA client installation depends on `uname -n` to provide a fqdn. This script updates your 
     # /etc/sysconfig/network file so the hostname there matches your fqdn.  
 
-   file="/etc/sysconfig/network"
-   hostname=`hostname -s`
-   fqdn=`hostname -f`
+   local file="/etc/sysconfig/network"
+   local hostname=`hostname -s`
+   local fqdn=`hostname -f`
 
    sed -i "s/^HOSTNAME=$hostname$/HOSTNAME=$fqdn/g" $file
 }
