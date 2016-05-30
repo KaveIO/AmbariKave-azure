@@ -69,7 +69,7 @@ function blueprint_deploy {
 
     # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation
     # status. This lets us be certain that the installation is well under way. 
-    sleep 60
+    sleep 600
 
     while installation_status && [ "$INSTALATION_STATUS" = "working" ] ;  do
         echo $INSTALATION_STATUS
