@@ -141,7 +141,7 @@
 		"publicIPAddressName": "KAVEPublicIP",
 		"publicIPAddressType": "Static",
 		"extensionName": "/setup",
-		"branchName": "performance",
+		"branchName": "master",
 		"contentHost": "raw.githubusercontent.com",
 		"mainHost": "github.com",
 		"pathURI": "/DataAnalyticsOrganization/AmbariKave-azure/",
