@@ -12,6 +12,7 @@ KAVE_CLUSTER_URL=$7
 DESTDIR=${8:-contents}
 SWAP_SIZE=${9:-10g}
 WORKING_DIR=${10:-/root/kavesetup}
+CLUSTER_NAME=${11:-cluster}
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -20,13 +21,17 @@ function anynode_setup {
 }
 
 function download_blueprint {
-    wget -O "$WORKING_DIR/blueprint.json.template" "$KAVE_BLUEPRINT_URL"
+    local extension=.json.template
+    local blueprint_filename=blueprint$extension
+    local cluster_filename="$CLUSTER_NAME"$extension
+    
+    wget -O "$WORKING_DIR/$blueprint_filename" "$KAVE_BLUEPRINT_URL"
 
-    wget -O "$WORKING_DIR/cluster.json.template" "$KAVE_CLUSTER_URL"
+    wget -O "$WORKING_DIR/$cluster_filename" "$KAVE_CLUSTER_URL"
 
-    KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/blueprint.json.template")
+    KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/$blueprint_filename")
 
-    KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/cluster.json.template")
+    KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/$cluster_filename")
 }
 
 function distribute_keys {
@@ -44,7 +49,7 @@ function localize_cluster_file {
 }
 
 function initialize_blueprint {
-    sed -r s/<KAVE_ADMIN>/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
+    sed -r s/"<KAVE_ADMIN>"/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
 }
 
 function kave_install {
@@ -103,6 +108,18 @@ function installation_status {
     fi
 }
 
+function post_installation {
+    initialize_hdfs
+}
+
+initialize_hdfs() {
+    until curl --netrc -fs "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/services/HDFS" 2>&1 | grep RUNNING; do
+	sleep 1
+	echo "Waiting until HDFS service is up and running..."
+    done
+    su - hdfs -c "hadoop fs -mkdir -p /user/$USER"
+}
+
 anynode_setup
 
 CSVHOSTS=$(echo "$HOSTS" | tr ' ' ,)
@@ -126,3 +143,5 @@ patch_ipa
 wait_for_ambari
 
 blueprint_deploy
+
+post_installation &

@@ -17,13 +17,22 @@ function extradisknode_setup {
     "$DIR/extradisknode_setup.sh" "$REPOSITORY" "$USER" "$PASS" "$DISK" "$MOUNT" "$DESTDIR" "$SWAP_SIZE" "$WORKING_DIR"
 }
 
-function vnc_setup {
+function post_installation {
+    setup_vnc
+}
+
+setup_vnc() {
+    until which vncserver vncpasswd 2>&-; do
+	sleep 1
+	echo "Waiting until VNC is installed..."
+    done
     local vncdir=/home/"$USER"/.vnc
     local vncpasswd=$vncdir/.passwd
     mkdir -p "$vncdir"
     echo "$PASS" | vncpasswd -f > "$vncpasswd"; chmod 600 "$vncpasswd"
+    vncserver
 }
 
 extradisknode_setup
 
-vnc_setup
+post_installation &
