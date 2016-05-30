@@ -66,7 +66,42 @@ function wait_for_ambari {
 
 function blueprint_deploy {
     $BIN_DIR/blueprint_deploy.sh "$VERSION" "$KAVE_BLUEPRINT" "$KAVE_CLUSTER.local"
+
+    # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation
+    # status. This lets us be certain that the installation is well under way. 
+    sleep 60
+
+    while installation_status && [ "$INSTALATION_STATUS" = "working" ] ;  do
+        echo $INSTALATION_STATUS
+        sleep 5
+    done
+
+    if [ "$INSTALATION_STATUS" = "done" ]; then
+       echo "No Criticals detected. The installation appears to be successful!"
+    else
+       echo "Installation loop broken, installation possibly failed. Exiting."
+       exit 255
+    fi
 }
+
+function installation_status {
+    INSTALATION_STATUS_MESSAGE=$(curl --user admin:admin http://localhost:8080/api/v1/clusters/cluster/?fields=alerts_summary/* 2> /dev/null)
+    EXIT_STATUS=$?
+
+    if [ $EXIT_STATUS -ne 0 ]; then
+        return $EXIT_STATUS
+    else
+        if [[ $INSTALATION_STATUS_MESSAGE =~ "\"CRITICAL\" : 0" ]]; then
+            INSTALATION_STATUS="done"
+        else
+            INSTALATION_STATUS="working"
+        fi
+        return 0
+    fi
+}
+
+
+
 
 anynode_setup
 
