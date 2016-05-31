@@ -141,7 +141,7 @@
 		"publicIPAddressName": "KAVEPublicIP",
 		"publicIPAddressType": "Static",
 		"extensionName": "/setup",
-		"branchName": "timeout_issue",
+		"branchName": "master",
 		"contentHost": "raw.githubusercontent.com",
 		"mainHost": "github.com",
 		"pathURI": "/DataAnalyticsOrganization/AmbariKave-azure/",
