@@ -12,7 +12,7 @@ KAVE_CLUSTER_URL=$7
 DESTDIR=${8:-contents}
 SWAP_SIZE=${9:-10g}
 WORKING_DIR=${10:-/root/kavesetup}
-CLUSTER_NAME=${11:-cluster}
+CLUSTER_NAME=${11:-AmbariKave}
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -108,18 +108,6 @@ function installation_status {
     fi
 }
 
-function post_installation {
-    initialize_hdfs
-}
-
-initialize_hdfs() {
-    until curl --netrc -fs "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/services/HDFS" 2>&1 | grep RUNNING; do
-	sleep 1
-	echo "Waiting until HDFS service is up and running..."
-    done
-    su - hdfs -c "hadoop fs -mkdir -p /user/$USER"
-}
-
 anynode_setup
 
 CSVHOSTS=$(echo "$HOSTS" | tr ' ' ,)
@@ -143,5 +131,3 @@ patch_ipa
 wait_for_ambari
 
 blueprint_deploy
-
-post_installation &

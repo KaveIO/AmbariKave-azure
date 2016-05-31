@@ -18,7 +18,16 @@ function extradisknode_setup {
 }
 
 function post_installation {
+    initialize_hdfs
     setup_vnc
+}
+
+initialize_hdfs() {
+    until which hadoop 2>&- && hadoop fs -ls / 2>&-; do
+	sleep 1
+	echo "Waiting until HDFS service is up and running..."
+    done
+    su - hdfs -c "hadoop fs -mkdir -p /user/$USER; hadoop fs -chown $USER:$USER /user/$USER"
 }
 
 setup_vnc() {
@@ -27,12 +36,14 @@ setup_vnc() {
 	echo "Waiting until VNC is installed..."
     done
     local vncdir=/home/"$USER"/.vnc
-    local vncpasswd=$vncdir/.passwd
-    mkdir -p "$vncdir"
-    echo "$PASS" | vncpasswd -f > "$vncpasswd"; chmod 600 "$vncpasswd"
-    vncserver
+    local vncpasswd=$vncdir/passwd
+    su - $USER -c "
+        mkdir -p \"$vncdir\"
+        echo \"$PASS\" | vncpasswd -f > \"$vncpasswd\"; chmod 600 \"$vncpasswd\"
+        vncserver
+    "
 }
 
 extradisknode_setup
 
-post_installation &
+post_installation

@@ -156,17 +156,17 @@
 		"setupScriptsPath": "/Automation/setup/",
 		"anyNodeSetupScript": "anynode_setup.sh",
 		"ambariNodeSetupScript": "ambarinode_setup.sh",
-	    "extraDiskNodeSetupScript": "extradisknode_setup.sh",
-	    "gatewaySetupScript": "gateway_setup.sh",
+		"extraDiskNodeSetupScript": "extradisknode_setup.sh",
+		"gatewaySetupScript": "gateway_setup.sh",
 		"anyNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('anyNodeSetupScript'))]",
 		"ambariNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('ambariNodeSetupScript'))]",
-	    "extraDiskNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('extraDiskNodeSetupScript'))]",
-	    "gatewaySetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('gatewaySetupScript'))]",
+		"extraDiskNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('extraDiskNodeSetupScript'))]",
+		"gatewaySetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('gatewaySetupScript'))]",
 		"scriptInterpreter": "/bin/bash",
 		"commandToExecuteAnyNode": "[concat(variables('scriptInterpreter'), ' ', variables('anyNodeSetupScript'))]",
 		"commandToExecuteExtraDiskNode": "[concat(variables('scriptInterpreter'), ' ', variables('extraDiskNodeSetupScript'))]",
-	    "commandToExecuteAmbariNode": "[concat(variables('scriptInterpreter'), ' ', variables('ambariNodeSetupScript'))]",
-	    "commandToExecuteGateway": "[concat(variables('scriptInterpreter'), ' ', variables('gatewaySetupScript'))]",
+		"commandToExecuteAmbariNode": "[concat(variables('scriptInterpreter'), ' ', variables('ambariNodeSetupScript'))]",
+		"commandToExecuteGateway": "[concat(variables('scriptInterpreter'), ' ', variables('gatewaySetupScript'))]",
 		"kaveScriptsURI": "[concat(variables('baseMainURI'),'archive/',variables('branchName'),'.zip')]",
 		"blueprintPath": "/Automation/kave_blueprint/",
 		"kaveBlueprint": "[concat(variables('baseContentURI'), variables('blueprintPath'), 'KAVEAzure.blueprint.json')]",
@@ -177,12 +177,8 @@
 		"dataNodeExtraDisk": "/dev/sdc",
 		"nnoNodeExtraDisk": "/dev/sdc",
 		"gateMountPoint": "/data",
-<<<<<<< 3f0c019c8028b5ea6116bc1e9942b2a5aeafac01
-	  "dataNodeMountPoint": "/hadoop",
-	  "nnoNodeMountPoint": "/hadoop"
-=======
-		"dataNodeMountPoint": "/hadoop"
->>>>>>> Compliant ARM template | Useful links
+		"dataNodeMountPoint": "/hadoop",
+		"nnoNodeMountPoint": "/hadoop"
 	},
 	"resources": [{
 			"name": "[parameters('saName')]",
@@ -370,35 +366,45 @@
 							"id": "[variables('KAVESubnetRef')]"
 						}
 					}
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
-				}
-			}]
-		}
-	},
 
-{
-    "type": "Microsoft.Network/networkSecurityGroups",
-    "name": "[variables('publicNetworkSecurityGroupsName')]",
-    "apiVersion": "[variables('apiVersionNetwork')]",
-    "location": "[variables('location')]",
-    "properties": {
-      "securityRules": [{
-        "name": "SSH",
-        "properties": {
-          "protocol": "Tcp",
-          "sourcePortRange": "*",
-          "destinationPortRange": "22",
-          "sourceAddressPrefix": "*",
-          "destinationAddressPrefix": "*",
-          "access": "Allow",
-          "priority": 100,
-          "direction": "Inbound"
-        }
-      }]
-    },
-    "dependsOn": []
-},
-		      {
+				}]
+			}
+		},
+
+		{
+			"type": "Microsoft.Network/networkSecurityGroups",
+			"name": "[variables('publicNetworkSecurityGroupsName')]",
+			"apiVersion": "[variables('apiVersionNetwork')]",
+			"location": "[variables('location')]",
+			"properties": {
+					"securityRules": [{
+						"name": "SSH",
+						"properties": {
+							"protocol": "*",
+							"sourcePortRange": "*",
+							"destinationPortRange": "22",
+							"sourceAddressPrefix": "*",
+							"destinationAddressPrefix": "*",
+							"access": "Allow",
+							"priority": 100,
+							"direction": "Inbound"
+						}
+					}, {
+						"name": "VNC",
+						"properties": {
+							"protocol": "*",
+							"sourcePortRange": "*",
+							"destinationPortRange": "5900-5999",
+							"sourceAddressPrefix": "*",
+							"destinationAddressPrefix": "*",
+							"access": "Allow",
+							"priority": 101,
+							"direction": "Inbound"
+						}
+					}]
+			},
+			"dependsOn": []
+		},{
 		"apiVersion": "[variables('apiVersionCompute')]",
 		"name": "[parameters('GatewayNodeName')]",
 		"type": "Microsoft.Compute/virtualMachines",
@@ -409,123 +415,48 @@
 		],
 		"tags": {
 			"displayName": "[parameters('GatewayNodeName')]"
-=======
-				}]
-			}
->>>>>>> Fixing names and stuff
 		},
-
-		{
-			"type": "Microsoft.Network/networkSecurityGroups",
-			"name": "[variables('publicNetworkSecurityGroupsName')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
-			"location": "[variables('location')]",
-			"properties": {
-				"securityRules": [{
-					"name": "SSH",
-					"properties": {
-						"protocol": "*",
-						"sourcePortRange": "*",
-						"destinationPortRange": "22",
-						"sourceAddressPrefix": "*",
-						"destinationAddressPrefix": "*",
-						"access": "Allow",
-						"priority": 100,
-						"direction": "Inbound"
-					}
-				},
-						 {
-					"name": "VNC",
-					"properties": {
-						"protocol": "*",
-						"sourcePortRange": "*",
-						"destinationPortRange": "5900-5999",
-						"sourceAddressPrefix": "*",
-						"destinationAddressPrefix": "*",
-						"access": "Allow",
-						"priority": 101,
-						"direction": "Inbound"
-					}}]
+		"properties": {
+			"hardwareProfile": {
+				"vmSize": "[parameters('GatewayNodeSize')]"
 			},
-			"dependsOn": []
-		}, {
-			"apiVersion": "[variables('apiVersionCompute')]",
-			"name": "[parameters('GatewayNodeName')]",
-			"type": "Microsoft.Compute/virtualMachines",
-			"location": "[variables('location')]",
-			"dependsOn": [
-				"[concat('Microsoft.Storage/storageAccounts/', parameters('saPremiumName'))]",
-				"[concat('Microsoft.Network/networkInterfaces/', variables('GatewayNicName'))]"
-			],
-			"tags": {
-				"displayName": "[parameters('GatewayNodeName')]"
+			"osProfile": {
+				"computerName": "[parameters('GatewayNodeName')]",
+				"adminUsername": "[parameters('KAVEAdminUsername')]",
+				"adminPassword": "[parameters('KAVEAdminPassword')]"
 			},
-			"properties": {
-				"hardwareProfile": {
-					"vmSize": "[parameters('GatewayNodeSize')]"
+			"storageProfile": {
+				"imageReference": {
+					"publisher": "[variables('KAVEImagePublisher')]",
+					"offer": "[variables('KAVEImageOffer')]",
+					"sku": "[parameters('KAVECentOSVersion')]",
+					"version": "latest"
 				},
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
+			    "dataDisks": [{
+					"name": "[concat(parameters('GatewayNodeName'),'disk1')]",
+					"diskSizeGB": "500",
+					"lun": 0,
+					"vhd": {
+						"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('GatewayNodeName'), 'disk1', '.vhd')]"
+					},
+					"createOption": "Empty"
+			    }],
 				"osDisk": {
 					"name": "[concat(parameters('GatewayNodeName'),'OSDisk')]",
 					"vhd": {
 						"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('GatewayNodeName'),'OSDisk', '.vhd')]"
-=======
-				"osProfile": {
-					"computerName": "[parameters('GatewayNodeName')]",
-					"adminUsername": "[parameters('KAVEAdminUsername')]",
-					"adminPassword": "[parameters('KAVEAdminPassword')]"
-				},
-				"storageProfile": {
-					"imageReference": {
-						"publisher": "[variables('KAVEImagePublisher')]",
-						"offer": "[variables('KAVEImageOffer')]",
-						"sku": "[parameters('KAVECentOSVersion')]",
-						"version": "latest"
->>>>>>> Fixing names and stuff
 					},
-					"dataDisks": [{
-						"name": "[concat(parameters('GatewayNodeName'),'disk1')]",
-						"diskSizeGB": "10",
-						"lun": 0,
-						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('GatewayNodeName'), 'disk1', '.vhd')]"
-						},
-						"createOption": "Empty"
-					}, {
-						"name": "[concat(parameters('GatewayNodeName'),'disk2')]",
-						"diskSizeGB": "100",
-						"lun": 1,
-						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('GatewayNodeName'),'disk2', '.vhd')]"
-						},
-						"createOption": "Empty"
-					}, {
-						"name": "[concat(parameters('GatewayNodeName'),'disk3')]",
-						"diskSizeGB": "10",
-						"lun": 2,
-						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('GatewayNodeName'),'disk3', '.vhd')]"
-						},
-						"createOption": "Empty"
-					}],
-					"osDisk": {
-						"name": "[concat(parameters('GatewayNodeName'),'OSDisk')]",
-						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('GatewayNodeName'),'OSDisk', '.vhd')]"
-						},
-						"caching": "ReadWrite",
-						"createOption": "FromImage"
-					}
-				},
-				"networkProfile": {
-					"networkInterfaces": [{
-						"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('GatewayNicName'))]"
-					}]
+					"caching": "ReadWrite",
+					"createOption": "FromImage"
 				}
+			},
+			"networkProfile": {
+				"networkInterfaces": [{
+					"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('GatewayNicName'))]"
+				}]
 			}
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
 		}
-	}, {
+		},{
 		"apiVersion": "[variables('apiVersionCompute')]",
 		"name": "[parameters('CiNodeName')]",
 		"type": "Microsoft.Compute/virtualMachines",
@@ -545,90 +476,31 @@
 				"computerName": "[parameters('CiNodeName')]",
 				"adminUsername": "[parameters('KAVEAdminUsername')]",
 				"adminPassword": "[parameters('KAVEAdminPassword')]"
-=======
-		}, {
-			"apiVersion": "[variables('apiVersionCompute')]",
-			"name": "[parameters('CiNodeName')]",
-			"type": "Microsoft.Compute/virtualMachines",
-			"location": "[variables('location')]",
-			"dependsOn": [
-				"[concat('Microsoft.Storage/storageAccounts/', parameters('saPremiumName'))]",
-				"[concat('Microsoft.Network/networkInterfaces/', variables('CiNicName'))]"
-			],
-			"tags": {
-				"displayName": "[parameters('CiNodeName')]"
->>>>>>> Fixing names and stuff
 			},
-			"properties": {
-				"hardwareProfile": {
-					"vmSize": "[parameters('CiNodeSize')]"
+			"storageProfile": {
+				"imageReference": {
+					"publisher": "[variables('KAVEImagePublisher')]",
+					"offer": "[variables('KAVEImageOffer')]",
+					"sku": "[parameters('KAVECentOSVersion')]",
+					"version": "latest"
 				},
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
 				"osDisk": {
 					"name": "[concat(parameters('CiNodeName'), 'OSDisk')]",
 					"vhd": {
 						"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('CiNodeName'), 'OSDisk', '.vhd')]"
-=======
-				"osProfile": {
-					"computerName": "[parameters('CiNodeName')]",
-					"adminUsername": "[parameters('KAVEAdminUsername')]",
-					"adminPassword": "[parameters('KAVEAdminPassword')]"
-				},
-				"storageProfile": {
-					"imageReference": {
-						"publisher": "[variables('KAVEImagePublisher')]",
-						"offer": "[variables('KAVEImageOffer')]",
-						"sku": "[parameters('KAVECentOSVersion')]",
-						"version": "latest"
->>>>>>> Fixing names and stuff
 					},
-					"dataDisks": [{
-						"name": "[concat(parameters('CiNodeName'),'disk1')]",
-						"diskSizeGB": "100",
-						"lun": 0,
-						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('CiNodeName'), 'disk1', '.vhd')]"
-						},
-						"createOption": "Empty"
-					}],
-					"osDisk": {
-						"name": "[concat(parameters('CiNodeName'), 'OSDisk')]",
-						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('CiNodeName'), 'OSDisk', '.vhd')]"
-						},
-						"caching": "ReadWrite",
-						"createOption": "FromImage"
-					}
-				},
-				"networkProfile": {
-					"networkInterfaces": [{
-						"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('CiNicName'))]"
-					}]
+					"caching": "ReadWrite",
+					"createOption": "FromImage"
 				}
+			},
+			"networkProfile": {
+				"networkInterfaces": [{
+					"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('CiNicName'))]"
+				}]
 			}
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
 		}
-	}, {
-		"apiVersion": "[variables('apiVersionCompute')]",
-		"name": "[concat(parameters('NnoNodeName'),'-',copyIndex())]",
-		"type": "Microsoft.Compute/virtualMachines",
-		"location": "[variables('location')]",
-		"copy": {
-			"name": "NnoMachineLoop",
-			"count": "[parameters('NnoNodeCount')]"
-		},
-		"dependsOn": [
-			"[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
-			"NnoNicLoop"
-		],
-		"tags": {
-			"displayName": "[concat(parameters('NnoNodeName'),'-',copyIndex())]"
-		},
-		"properties": {
-			"hardwareProfile": {
-				"vmSize": "[parameters('NnoNodeSize')]"
-=======
-		}, {
+	}
+, {
 			"apiVersion": "[variables('apiVersionCompute')]",
 			"name": "[concat(parameters('NnoNodeName'),'-',copyIndex())]",
 			"type": "Microsoft.Compute/virtualMachines",
@@ -636,10 +508,9 @@
 			"copy": {
 				"name": "NnoMachineLoop",
 				"count": "[parameters('NnoNodeCount')]"
->>>>>>> Fixing names and stuff
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Storage/storageAccounts/', parameters('saPremiumName'))]",
+				"[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
 				"NnoNicLoop"
 			],
 			"tags": {
@@ -649,12 +520,6 @@
 				"hardwareProfile": {
 					"vmSize": "[parameters('NnoNodeSize')]"
 				},
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
-				"osDisk": {
-					"name": "[concat(parameters('NnoNodeName'),copyIndex(), 'OSDisk')]",
-					"vhd": {
-						"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('NnoNodeName'),copyIndex(), 'OSDisk', '.vhd')]"
-=======
 				"osProfile": {
 					"computerName": "[concat(parameters('NnoNodeName'),'-',copyIndex())]",
 					"adminUsername": "[parameters('KAVEAdminUsername')]",
@@ -666,21 +531,11 @@
 						"offer": "[variables('KAVEImageOffer')]",
 						"sku": "[parameters('KAVECentOSVersion')]",
 						"version": "latest"
->>>>>>> Fixing names and stuff
 					},
-					"dataDisks": [{
-						"name": "[concat(parameters('NnoNodeName'),copyIndex(),'disk1')]",
-						"diskSizeGB": "10",
-						"lun": 0,
-						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('NnoNodeName'), copyIndex(), 'disk1', '.vhd')]"
-						},
-						"createOption": "Empty"
-					}],
 					"osDisk": {
 						"name": "[concat(parameters('NnoNodeName'),copyIndex(), 'OSDisk')]",
 						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('NnoNodeName'),copyIndex(), 'OSDisk', '.vhd')]"
+							"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('NnoNodeName'),copyIndex(), 'OSDisk', '.vhd')]"
 						},
 						"caching": "ReadWrite",
 						"createOption": "FromImage"
@@ -692,29 +547,6 @@
 					}]
 				}
 			}
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
-		}
-	}, {
-		"apiVersion": "[variables('apiVersionCompute')]",
-		"name": "[concat(parameters('DataNodeName'),'-',copyIndex())]",
-		"type": "Microsoft.Compute/virtualMachines",
-		"location": "[variables('location')]",
-		"copy": {
-			"name": "DataMachineLoop",
-			"count": "[parameters('DataNodeCount')]"
-		},
-		"dependsOn": [
-			"[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
-			"[concat('Microsoft.Storage/storageAccounts/', parameters('saPremiumName'))]",
-			"DataNicLoop"
-		],
-		"tags": {
-			"displayName": "[concat(parameters('DataNodeName'),'-',copyIndex())]"
-		},
-		"properties": {
-			"hardwareProfile": {
-				"vmSize": "[parameters('DataNodeSize')]"
-=======
 		}, {
 			"apiVersion": "[variables('apiVersionCompute')]",
 			"name": "[concat(parameters('DataNodeName'),'-',copyIndex())]",
@@ -723,9 +555,9 @@
 			"copy": {
 				"name": "DataMachineLoop",
 				"count": "[parameters('DataNodeCount')]"
->>>>>>> Fixing names and stuff
 			},
 			"dependsOn": [
+				"[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
 				"[concat('Microsoft.Storage/storageAccounts/', parameters('saPremiumName'))]",
 				"DataNicLoop"
 			],
@@ -736,21 +568,6 @@
 				"hardwareProfile": {
 					"vmSize": "[parameters('DataNodeSize')]"
 				},
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
-				"dataDisks": [{
-					"name": "[concat(parameters('DataNodeName'),copyIndex(),'disk1')]",
-					"diskSizeGB": "1000",
-					"lun": 0,
-					"vhd": {
-						"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('DataNodeName'), copyIndex(), 'disk1', '.vhd')]"
-					},
-					"createOption": "Empty"
-				}],
-				"osDisk": {
-					"name": "[concat(parameters('DataNodeName'),copyIndex(), 'OSDisk')]",
-					"vhd": {
-						"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('DataNodeName'),copyIndex(), 'OSDisk', '.vhd')]"
-=======
 				"osProfile": {
 					"computerName": "[concat(parameters('DataNodeName'),'-',copyIndex())]",
 					"adminUsername": "[parameters('KAVEAdminUsername')]",
@@ -762,29 +579,20 @@
 						"offer": "[variables('KAVEImageOffer')]",
 						"sku": "[parameters('KAVECentOSVersion')]",
 						"version": "latest"
->>>>>>> Fixing names and stuff
 					},
 					"dataDisks": [{
 						"name": "[concat(parameters('DataNodeName'),copyIndex(),'disk1')]",
-						"diskSizeGB": "10",
+						"diskSizeGB": "1000",
 						"lun": 0,
 						"vhd": {
 							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('DataNodeName'), copyIndex(), 'disk1', '.vhd')]"
-						},
-						"createOption": "Empty"
-					}, {
-						"name": "[concat(parameters('DataNodeName'),copyIndex(),'disk2')]",
-						"diskSizeGB": "100",
-						"lun": 1,
-						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('DataNodeName'),copyIndex(), 'disk2', '.vhd')]"
 						},
 						"createOption": "Empty"
 					}],
 					"osDisk": {
 						"name": "[concat(parameters('DataNodeName'),copyIndex(), 'OSDisk')]",
 						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('DataNodeName'),copyIndex(), 'OSDisk', '.vhd')]"
+							"uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('DataNodeName'),copyIndex(), 'OSDisk', '.vhd')]"
 						},
 						"caching": "ReadWrite",
 						"createOption": "FromImage"
@@ -862,32 +670,8 @@
 				"protectedSettings": {
 					"commandToExecute": "[concat(variables('commandToExecuteAmbariNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('nodes'),' ',variables('version'),' ',variables('kaveBlueprint'),' ',variables('kaveCluster'))]"
 				}
+
 			}
-<<<<<<< e816b97773fd92565098905b107f58529cac5ad7
-		}
-	}, {
-		"type": "Microsoft.Compute/virtualMachines/extensions",
-		"name": "[concat(parameters('GatewayNodeName'), variables('extensionName'))]",
-		"apiVersion": "[variables('apiVersionCompute')]",
-		"location": "[variables('location')]",
-		"dependsOn": [
-			"[concat('Microsoft.Compute/virtualMachines/', parameters('GatewayNodeName'))]"
-		],
-		"properties": {
-			"publisher": "Microsoft.OSTCExtensions",
-			"type": "CustomScriptForLinux",
-			"typeHandlerVersion": "1.4",
-			"settings": {
-<<<<<<< 3f0c019c8028b5ea6116bc1e9942b2a5aeafac01
-				"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]",
-				"commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
-=======
-				"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI')), ' ')]"
-			},
-			"protectedSettings": {
-				"commandToExecute": "[concat(variables('commandToExecuteExtraDiskNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"
->>>>>>> Compliant ARM template | Useful links
-=======
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
 			"name": "[concat(parameters('GatewayNodeName'), variables('extensionName'))]",
@@ -901,12 +685,11 @@
 				"type": "CustomScriptForLinux",
 				"typeHandlerVersion": "1.4",
 				"settings": {
-					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI'),' ',variables('gatewaySetupURI')), ' ')]"
+					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('gatewaySetupURI')), ' ')]"
 				},
 				"protectedSettings": {
 					"commandToExecute": "[concat(variables('commandToExecuteGateway'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"
 				}
->>>>>>> Fixing names and stuff
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
