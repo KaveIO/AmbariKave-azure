@@ -31,6 +31,8 @@ function install_packages {
     yum install -y epel-release
 
     yum install -y sshpass pdsh
+
+    yum install -y rpcbind
 }
 
 function change_rootpass {
