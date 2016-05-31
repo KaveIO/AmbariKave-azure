@@ -12,7 +12,6 @@ KAVE_CLUSTER_URL=$7
 DESTDIR=${8:-contents}
 SWAP_SIZE=${9:-10g}
 WORKING_DIR=${10:-/root/kavesetup}
-CLUSTER_NAME=${11:-AmbariKave}
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -21,17 +20,13 @@ function anynode_setup {
 }
 
 function download_blueprint {
-    local extension=.json.template
-    local blueprint_filename=blueprint$extension
-    local cluster_filename="$CLUSTER_NAME"$extension
-    
-    wget -O "$WORKING_DIR/$blueprint_filename" "$KAVE_BLUEPRINT_URL"
+    wget -O "$WORKING_DIR/blueprint.json.template" "$KAVE_BLUEPRINT_URL"
 
-    wget -O "$WORKING_DIR/$cluster_filename" "$KAVE_CLUSTER_URL"
+    wget -O "$WORKING_DIR/cluster.json.template" "$KAVE_CLUSTER_URL"
 
-    KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/$blueprint_filename")
+    KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/blueprint.json.template")
 
-    KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/$cluster_filename")
+    KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/cluster.json.template")
 }
 
 function distribute_keys {
@@ -49,7 +44,7 @@ function localize_cluster_file {
 }
 
 function initialize_blueprint {
-    sed -r s/"<KAVE_ADMIN>"/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
+    sed -r s/<KAVE_ADMIN>/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
 }
 
 function kave_install {
@@ -63,6 +58,8 @@ function patch_ipa {
     #Why this? In different parts of the code the common name (CN) is build concatenating the DNS domain name and the string "Certificate Authority", and in our case due to Azure long DNSDN the field ends up to be longer than 64 chars which is the RFC-defined standard maximum. This suffix is added as a naming convention, so we cannot just drop it, rather amend it.
 
     grep -Ilr "Certificate Authority" /usr/lib/python2.6/site-packages/ipa* | xargs sed -i 's/Certificate Authority/CA/g'
+    #To be fixed in FreeIPA (ideally, but it won't be the case)
+    #To be fixed in KAVE (installation will refuse to continue if the total string "FQDN + "Certificate Authority" is longer than 64 OR it gives the option to apply this patch
 }
 
 function wait_for_ambari {
