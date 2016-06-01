@@ -20,6 +20,10 @@ function anynode_setup {
     "$DIR/anynode_setup.sh" "$REPOSITORY" "$USER" "$PASS" "$DESTDIR" "$SWAP_SIZE" "$WORKING_DIR"
 }
 
+function csvhosts {
+    CSVHOSTS=$(echo "$HOSTS" | tr ' ' ,)
+}
+
 function download_blueprint {
     local extension=.json.template
     local blueprint_filename=blueprint$extension
@@ -32,6 +36,10 @@ function download_blueprint {
     KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/$blueprint_filename")
 
     KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/$cluster_filename")
+}
+
+function define_bindir {
+    BIN_DIR=$WORKING_DIR/$DESTDIR/Automation/setup/bin
 }
 
 function distribute_keys {
@@ -112,11 +120,11 @@ function installation_status {
 
 anynode_setup
 
-CSVHOSTS=$(echo "$HOSTS" | tr ' ' ,)
+csvhosts
 
 download_blueprint
 
-BIN_DIR=$WORKING_DIR/$DESTDIR/Automation/setup/bin
+define_bindir
 
 distribute_keys
 

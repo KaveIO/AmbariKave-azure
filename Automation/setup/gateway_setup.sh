@@ -46,4 +46,4 @@ setup_vnc() {
 
 extradisknode_setup
 
-post_installation
+post_installation &
