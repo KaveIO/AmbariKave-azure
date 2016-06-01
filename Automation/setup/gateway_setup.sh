@@ -24,7 +24,7 @@ function post_installation {
 
 initialize_hdfs() {
     until which hadoop 2>&- && hadoop fs -ls / 2>&-; do
-	sleep 1
+	sleep 60
 	echo "Waiting until HDFS service is up and running..."
     done
     su - hdfs -c "hadoop fs -mkdir -p /user/$USER; hadoop fs -chown $USER:$USER /user/$USER"
@@ -32,7 +32,7 @@ initialize_hdfs() {
 
 setup_vnc() {
     until which vncserver vncpasswd 2>&-; do
-	sleep 1
+	sleep 60
 	echo "Waiting until VNC is installed..."
     done
     local vncdir=/home/"$USER"/.vnc

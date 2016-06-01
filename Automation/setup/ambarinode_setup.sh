@@ -12,6 +12,7 @@ KAVE_CLUSTER_URL=$7
 DESTDIR=${8:-contents}
 SWAP_SIZE=${9:-10g}
 WORKING_DIR=${10:-/root/kavesetup}
+CLUSTER_NAME=${11:-cluster}
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -20,13 +21,17 @@ function anynode_setup {
 }
 
 function download_blueprint {
-    wget -O "$WORKING_DIR/blueprint.json.template" "$KAVE_BLUEPRINT_URL"
+    local extension=.json.template
+    local blueprint_filename=blueprint$extension
+    local cluster_filename="$CLUSTER_NAME"$extension
+    
+    wget -O "$WORKING_DIR/$blueprint_filename" "$KAVE_BLUEPRINT_URL"
 
-    wget -O "$WORKING_DIR/cluster.json.template" "$KAVE_CLUSTER_URL"
+    wget -O "$WORKING_DIR/$cluster_filename" "$KAVE_CLUSTER_URL"
 
-    KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/blueprint.json.template")
+    KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/$blueprint_filename")
 
-    KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/cluster.json.template")
+    KAVE_CLUSTER=$(readlink -e "$WORKING_DIR/$cluster_filename")
 }
 
 function distribute_keys {
@@ -44,7 +49,7 @@ function localize_cluster_file {
 }
 
 function initialize_blueprint {
-    sed -r s/<KAVE_ADMIN>/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
+    sed -r s/"<KAVE_ADMIN>"/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
 }
 
 function kave_install {
@@ -65,7 +70,7 @@ function patch_ipa {
 function wait_for_ambari {
     cp "$BIN_DIR/../.netrc" ~
     until curl --netrc -fs http://localhost:8080/api/v1/clusters; do
-	sleep 1
+	sleep 60
 	echo "Waiting until ambari server is up and running..."
     done
 }
@@ -76,7 +81,7 @@ function blueprint_deploy {
     # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way. 
     sleep 600
 
-    while installation_status && [ "$INSTALLATION_STATUS" = "working" ] ;  do
+    while installation_status && [ $INSTALLATION_STATUS = "working" ] ;  do
         echo $INSTALLATION_STATUS
         sleep 5
     done
@@ -90,13 +95,13 @@ function blueprint_deploy {
 }
 
 function installation_status {
-    INSTALLATION_STATUS_MESSAGE=$(curl --user admin:admin http://localhost:8080/api/v1/clusters/cluster/?fields=alerts_summary/* 2> /dev/null)
-    EXIT_STATUS=$?
+    local installation_status_message=$(curl --user admin:admin "http://localhost:8080/api/v1/clusters/cluster/?fields=alerts_summary/*" 2> /dev/null)
+    local exit_status=$?
 
-    if [ $EXIT_STATUS -ne 0 ]; then
-        return $EXIT_STATUS
+    if [ $exit_status -ne 0 ]; then
+        return $exit_status
     else
-        if [[ $INSTALLATION_STATUS_MESSAGE =~ "\"CRITICAL\" : 0" ]]; then
+        if [[ "$installation_status_message" =~ "\"CRITICAL\" : 0" ]]; then
             INSTALLATION_STATUS="done"
         else
             INSTALLATION_STATUS="working"

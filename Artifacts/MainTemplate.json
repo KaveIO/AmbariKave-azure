@@ -175,10 +175,8 @@
 		"version": "2.0-Beta",
 		"gateExtraDisk": "/dev/sdc",
 		"dataNodeExtraDisk": "/dev/sdc",
-		"nnoNodeExtraDisk": "/dev/sdc",
 		"gateMountPoint": "/data",
-		"dataNodeMountPoint": "/hadoop",
-		"nnoNodeMountPoint": "/hadoop"
+		"dataNodeMountPoint": "/hadoop"
 	},
 	"resources": [{
 			"name": "[parameters('saName')]",
@@ -685,7 +683,7 @@
 				"type": "CustomScriptForLinux",
 				"typeHandlerVersion": "1.4",
 				"settings": {
-					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('gatewaySetupURI')), ' ')]"
+					"fileUris": "[split(concat(variables('extraDiskNodeSetupURI'),' ',variables('gatewaySetupURI'),' ',variables('anyNodeSetupURI')), ' ')]"
 				},
 				"protectedSettings": {
 					"commandToExecute": "[concat(variables('commandToExecuteGateway'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"
