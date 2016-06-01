@@ -5,7 +5,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPOSITORY=$1
 USER=$2
 PASS=$3
-HOSTS=$4
+HOSTS="localhost $4"
 VERSION=$5
 KAVE_BLUEPRINT_URL=$6
 KAVE_CLUSTER_URL=$7
@@ -20,8 +20,8 @@ function anynode_setup {
     "$DIR/anynode_setup.sh" "$REPOSITORY" "$USER" "$PASS" "$DESTDIR" "$SWAP_SIZE" "$WORKING_DIR"
 }
 
-function csvhosts {
-    CSVHOSTS=$(echo "$HOSTS" | tr ' ' ,)
+function csv_hosts {
+    CSV_HOSTS=$(echo "$HOSTS" | tr ' ' ,)
 }
 
 function download_blueprint {
@@ -49,7 +49,7 @@ function distribute_keys {
 function customize_hosts {
     $BIN_DIR/create_hostsfile.sh "$WORKING_DIR" "$HOSTS"
 
-    pdcp -w "$CSVHOSTS" "$WORKING_DIR/hosts" /etc/hosts
+    pdcp -w "$CSV_HOSTS" "$WORKING_DIR/hosts" /etc/hosts
 }
 
 function localize_cluster_file {
@@ -73,6 +73,12 @@ function patch_ipa {
     grep -Ilr "Certificate Authority" /usr/lib/python2.6/site-packages/ipa* | xargs sed -i 's/Certificate Authority/CA/g'
     #To be fixed in FreeIPA (ideally, but it won't be the case)
     #To be fixed in KAVE (installation will refuse to continue if the total string "FQDN + "Certificate Authority" is longer than 64 OR it gives the option to apply this patch
+}
+
+function patch_kave {
+     #The FreeIPA client installation depends on `uname -n` to provide a fqdn. This script updates your  /etc/sysconfig/network file so the hostname there matches your fqdn. Without this the FreeIPA clients will end up using the local names such as 'gate' and 'ambari' and the communication will fail.
+    #To be fixed in KAVE (FreeIPA client installation wrapper)
+    cp "$WORKING_DIR"/contents/Automation/patch/freeipa.py "$WORKING_DIR"/AmbariKave-$VERSION/src/HDP/2.4.KAVE/services/FREEIPA/package/scripts
 }
 
 function wait_for_ambari {
@@ -120,7 +126,7 @@ function installation_status {
 
 anynode_setup
 
-csvhosts
+csv_hosts
 
 download_blueprint
 
@@ -137,6 +143,8 @@ initialize_blueprint
 kave_install
 
 patch_ipa
+
+patch_kave
 
 wait_for_ambari
 
