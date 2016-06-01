@@ -44,14 +44,10 @@
 		"mapred-site": {
 			"mapreduce.map.memory.mb": "9216",
 			"mapreduce.reduce.memory.mb": "9216",
-			"mapreduce.map.java.opts": "-Xmx7372m",
 			"mapreduce.reduce.java.opts": "-Xmx7372m",
 			"yarn.app.mapreduce.am.resource.mb": "9216",
-			"yarn.app.mapreduce.am.command-opts": "-Xmx7372",
 			"mapreduce.task.io.sort.mb": "3686"
 		}
-	}, {
-		"yarn.timeline-service.store-class": "org.apache.hadoop.yarn.server.timeline.LeveldbTimelineStore"
 	}, {
 		"freeipa": {
 			"ldap_bind_password": "testtestdirpass1234",
