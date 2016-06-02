@@ -1,103 +1,129 @@
 {
-	"handler": "Microsoft.Compute.MultiVm",
-    "version": "0.0.1-preview",
-    "testURL": "https://portal.azure.com/#blade/Microsoft_Azure_Compute/CreateMultiVmWizardBlade/internal_bladeCallId/anything/internal_bladeCallerParams/{\"initialData\":{},\"providerConfig\":{\"createUiDefinition\":\"https://raw.githubusercontent.com/DataAnalyticsOrganization/AmbariKave-azure/master/Artifacts/CreateUiDefinition.json\"}}",
-	"parameters": {
-		"basics": [{
-			"name": "KaveAdmin",
-			"type": "Microsoft.Compute.UserNameTextBox",
-			"label": "KAVEAdminUserName",
-			"defaultValue": "kaveadmin",
-			"toolTip": "Enter the desired KAVE admin user name.",
-			"constraints": {
-			    "required": true,
-			    "regex": "^[a-z]{6,32}$"
-			},
-			"osPlatform": "Linux",
-			"visible": true
-		}, {
-			"name": "KAVEAdminPassword",
-			"type": "Microsoft.Common.PasswordBox",
-			"label": {
-				"password": "Password",
-				"confirmPassword": "Confirm password"
-			},
-			"toolTip": "Enter a password for the KAVE admin.",
-			"constraints": {
-				"required": true,
-				"regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{8,72}$",
-				"validationMessage": "The password must be at least 8 characters, and 3 of one number, one lower case letter, one upper case letter, and one special character."
-			},
-			"options": {
-				"hideConfirmation": false
-			},
-			"visible": true
-		}, {
-			"name": "saName",
-			"type": "Microsoft.Storage.StorageAccountSelector",
-			"label": "Storage account",
-			"toolTip": "",
-			"defaultValue": {
-				"name": "[concat('sakave01', uniqueString())]",
-				"type": "Standard_LRS"
-			},
-			"constraints": {
-				"allowedTypes": ["Standard_LRS"]
-			},
-			"options": {
-				"hideExisting": true
-			},
-			"visible": true
-		}, {
-			"name": "saPremiumName",
-			"type": "Microsoft.Storage.StorageAccountSelector",
-			"label": "Premium Storage account",
-			"toolTip": "",
-			"defaultValue": {
-				"name": "[concat('sakavepremium01', uniqueString())]",
-				"type": "Premium_LRS"
-			},
-			"constraints": {
-				"allowedTypes": ["Premium_LRS"]
-			},
-			"options": {
-				"hideExisting": true
-			},
-			"visible": true
-		}, {
-			"name": "dnsLabelPrefix",
-			"type": "Microsoft.Network.PublicIpAddressCombo",
-			"label": {
-				"publicIpAddress": "Public IP address",
-				"domainNameLabel": "kavegateway"
-			},
-			"toolTip": {
-				"publicIpAddress": "",
-				"domainNameLabel": ""
-			},
-			"defaultValue": {
-				"publicIpAddressName": "KAVEPublicIP",
-				"domainNameLabel": "kavegateway"
-			},
-			"constraints": {
-				"required": {
-					"domainNameLabel": true
-				}
-			},
-			"options": {
-				"hideNone": false,
-				"hideDomainNameLabel": false,
-				"hideExisting": true
-			},
-			"visible": true
-		}],
-		"steps": [],
-		"outputs": {
-			"KAVEAdminUserName": "[basics('KAVEAdminUserName')]",
-			"KAVEAdminPassword": "[basics('KAVEAdminPassword')]",
-			"saName": "[basics('saName')]",
-			"saPremiumName": "[basics('saPremiumName')]",
-			"dnsLabelPrefix": "[basics('dnsLabelPrefix')]"
-		}
-	}
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.0.1-preview",
+  "parameters": {
+        "basics": [                 
+        {
+          "name": "KaveAdminUserName",
+          "type": "Microsoft.Compute.UserNameTextBox",
+          "label": "KAVE admin",
+          "defaultValue": "",
+          "toolTip": "Enter a KAVE admin user name. Must be lower case, 6-32 letters long and can't contain any numbers.",
+          "constraints": {
+            "required": true,
+             "regex": "^[a-z]{6,32}$"
+          },
+          "osPlatform": "Linux",
+          "visible": true
+        },
+      {"name": "KAVEAdminPassword",
+      "type": "Microsoft.Compute.CredentialsCombo",
+      "label": {
+        "password": "Password",
+        "confirmPassword": "Confirm password"
+      },
+      "toolTip": {
+        "password": "Admin password for the KAVE admin."
+      },
+      "osPlatform": "Windows",
+      "constraints": { 
+            "required": true 
+      } 
+    }
+
+    ],
+    "steps": [
+      {
+      "name": "storageConfig",
+      "label": "Storage",
+      "subLabel": {
+        "preValidation": "Configure the storage settings",
+        "postValidation": "Done"
+      },
+      "bladeTitle": "Storage",
+      "elements": [             {
+          "name": "saName",
+          "type": "Microsoft.Storage.StorageAccountSelector",
+          "label": "Storage account",
+          "toolTip": "",
+          "defaultValue": {
+            "name": "",
+            "type": "Standard_LRS"
+          },
+          "constraints": {
+            "allowedTypes": ["Standard_LRS"]
+          },
+          "options": {
+            "hideExisting": true
+          },
+          "visible": true
+        }
+        ,
+        {
+          "name": "saPremiumName", 
+          "type": "Microsoft.Storage.StorageAccountSelector",
+          "label": "Premium Storage account",
+          "toolTip": "",
+          "defaultValue": {
+            "name": "",
+            "type": "Premium_LRS"
+          },
+          "constraints": {
+            "allowedTypes": ["Premium_LRS"]
+          },
+          "options": {
+            "hideExisting": true
+          },
+          "visible": true
+        }]    
+    },
+    {
+      "name": "dnsConfig",
+      "label": "DNS prefix",
+      "subLabel": {
+        "preValidation": "Configure the DNS prefix.",
+        "postValidation": "Done"
+      },
+      "bladeTitle": "DNS prefix",
+      "elements": [{
+        "name": "dnsLabelPrefix",
+        "type": "Microsoft.Network.PublicIpAddressCombo",
+        "label": {
+          "publicIpAddress": "Public IP address",
+          "domainNameLabel": "Domain name label"
+        },
+        "toolTip": {
+          "publicIpAddress": "Choose a public IP address.",
+          "domainNameLabel": "Choose a domain name label."
+        },
+        "defaultValue": {
+          "publicIpAddressName": "",
+          "domainNameLabel": ""
+        },
+        "constraints": {
+          "required": {
+            "domainNameLabel": true
+          }
+        },
+        "options": {
+          "hideNone": false,
+          "hideDomainNameLabel": false,
+          "hideExisting": false
+        },
+        "visible": true
+      }
+        
+      ]    
+    }
+    ]
+    ,
+    "outputs": {
+      "KAVEAdminUserName": "[basics('KAVEAdminUserName')]",
+      "KAVEAdminPassword": "[basics('KAVEAdminPassword')]",
+      "saName": "[steps('storageConfig').saName]",
+      "saPremiumName": "[steps('storageConfig').saPremiumName]",
+      "dnsLabelPrefix": "[steps('dnsConfig').dnsLabelPrefix]"
+    }  
+  }
 }
+
