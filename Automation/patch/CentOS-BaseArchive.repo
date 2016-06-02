@@ -1,0 +1,65 @@
+#PATCH
+
+#Base archive repo file in place of the CentOS-Base.repo file whose repo site is discontinued.
+
+[archivebase]
+name=CentOS-$releasever - Base
+baseurl=http://vault.centos.org/6.5/os/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+#released updates
+[archiveupdates]
+name=CentOS-$releasever - Updates
+baseurl=http://vault.centos.org/6.5/updates/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+#additional packages that may be useful
+[archiveextras]
+name=CentOS-$releasever - Extras
+baseurl=http://vault.centos.org/6.5/extras/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+#additional packages that extend functionality of existing packages
+[archivecentosplus]
+name=CentOS-$releasever - Plus
+baseurl=http://vault.centos.org/6.5/centosplus/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+#contrib - packages by Centos Users
+[archivecontrib]
+name=CentOS-$releasever - Contrib
+baseurl=http://vault.centos.org/6.5/contrib/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+#SCL
+[archivescl]
+name=CentOS-$releasever - scl
+baseurl=http://vault.centos.org/6.5/SCL/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+#CR
+[archivecr]
+name=CentOS-$releasever - cr
+baseurl=http://vault.centos.org/6.5/cr/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+#Fasttrack
+[archivefasttrack]
+name=CentOS-$releasever - fasstrack
+baseurl=http://vault.centos.org/6.5/fasttrack/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+#xen4
+[archivexen4]
+name=CentOS-$releasever - xen4
+baseurl=http://vault.centos.org/6.5/xen4/x86_64
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6

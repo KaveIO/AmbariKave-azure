@@ -24,7 +24,14 @@ function setup_repo {
 
     rm -rf "$WORKING_DIR"/temp "$WORKING_DIR/scripts.zip"
 
-    chmod -R +x "$WORKING_DIR/$DESTDIR/Automation/setup"
+    AUTOMATION_DIR="$WORKING_DIR/$DESTDIR/Automation"
+    
+    chmod -R +x "$AUTOMATION_DIR/setup"
+}
+
+function patch_yum {
+    #The 6.5 dirs were wiped out the default yum repo just this morning. Therefore we have to use the archive repo.
+    cp "$AUTOMATION_DIR"/patch/CentOS-Base.repo "$AUTOMATION_DIR"/patch/CentOS-BaseArchive.repo /etc/yum.repos.d
 }
 
 function install_packages {
@@ -68,6 +75,8 @@ function disable_selinux {
 }
 
 setup_repo
+
+patch_yum
 
 install_packages
 
