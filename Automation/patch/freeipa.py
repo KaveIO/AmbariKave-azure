@@ -16,9 +16,6 @@
 #
 ##############################################################################
 import subprocess
-#PATCH
-from subprocess import check_output
-#PATCH
 import os
 import os.path
 import time
@@ -103,7 +100,9 @@ class RobotAdmin():
         if os.path.isfile(self.password_file):
 
             #PATCH
-            hostname = check_output(["hostname", "-f"]).strip()
+            p = subprocess.Popen(["hostname", "-f"], stdout=subprocess.PIPE)
+            out, _ = p.communicate()
+            hostname = out.strip()
             options = ['--enable-dns-updates', '--ssh-trust-dns', '--domain', domain, '--hostname', hostname] if install_with_dns else ['--hostname', hostname]
             #PATCH
 
