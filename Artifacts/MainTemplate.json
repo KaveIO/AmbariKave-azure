@@ -150,7 +150,7 @@
 		"branchName": "master",
 		"contentHost": "raw.githubusercontent.com",
 		"mainHost": "github.com",
-		"pathURI": "/DataAnalyticsOrganization/AmbariKave-azure/",
+		"pathURI": "/KaveIO/AmbariKave-azure/",
 		"baseContentURI": "[concat('https://',variables('contentHost'),variables('pathURI'),variables('branchName'))]",
 		"baseMainURI": "[concat('https://',variables('mainHost'),variables('pathURI'))]",
 		"setupScriptsPath": "/Automation/setup/",
