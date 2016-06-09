@@ -11,6 +11,7 @@
 		},
 		"KAVEAdminPassword": {
 			"type": "securestring",
+			"comments": "The azure marketplace requirements state that ssh-pub-key is mandatory for linux based vms. In the case of the Kave installer this is problamatic. For a correct automatied installation it's required that the install user is identified by a password, during operation a functional password is also a hard requirement. Kave relies on FreeIPA which is a Kerberos based domain controller equivalent, while ssh-pub-key login is possible, the main identification form is password based.",
 			"metadata": {
 				"description": "Password of the admin user"
 			}
@@ -129,7 +130,7 @@
 		"KAVEnetworkSubnet1Prefix": "[parameters('KAVENetworkSubnet')]",
 		"KAVEImagePublisher": "OpenLogic",
 		"KAVEImageOffer": "CentOS",
-		"AmbariNodeDiskName": "[parameters('AmbariNodeName')]",
+                "AmbariNodeDiskName": "[parameters('AmbariNodeName')]",
 		"AmbariNicName": "[concat(parameters('AmbariNodeName'), 'NiC')]",
 		"GatewayNicName": "[concat(parameters('GatewayNodeName'), 'NiC')]",
 		"CiNicName": "[concat(parameters('CiNodeName'), 'NiC')]",
@@ -762,5 +763,4 @@
 			"type": "string"
 		}
 	}
-
 }
