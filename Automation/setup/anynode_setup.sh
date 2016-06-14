@@ -31,7 +31,9 @@ function setup_repo {
 
 function patch_yum {
     #The 6.5 dirs were wiped out the default yum repo just this morning. Therefore we have to use the archive repo.
-    cp "$AUTOMATION_DIR"/patch/CentOS-Base.repo "$AUTOMATION_DIR"/patch/CentOS-BaseArchive.repo /etc/yum.repos.d
+    local repodir=/etc/yum.repos.d
+    rm $repodir/*
+    cp "$AUTOMATION_DIR"/patch/CentOS-BaseArchive.repo $repodir
 }
 
 function install_packages {
