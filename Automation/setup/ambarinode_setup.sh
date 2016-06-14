@@ -64,17 +64,6 @@ function kave_install {
     $BIN_DIR/kave_install.sh "$VERSION" "$WORKING_DIR"
 }
 
-function patch_ipa {
-    #Install FreeIPA server and patch it; as this is a regular yum install Ambari will try to reinstall it but it will not be overwritten of course
-    yum install -y ipa-server
-    
-    #Why this? In different parts of the code the common name (CN) is build concatenating the DNS domain name and the string "Certificate Authority", and in our case due to Azure long DNSDN the field ends up to be longer than 64 chars which is the RFC-defined standard maximum. This suffix is added as a naming convention, so we cannot just drop it, rather amend it.
-
-    grep -IlR "Certificate Authority" /usr/lib/python2.6/site-packages/ipa* | xargs sed -i 's/Certificate Authority/CA/g'
-    #To be fixed in FreeIPA (ideally, but it won't be the case)
-    #To be fixed in KAVE (installation will refuse to continue if the total string "FQDN + "Certificate Authority" is longer than 64 OR it gives the option to apply this patch
-}
-
 function wait_for_ambari {
     cp "$BIN_DIR/../.netrc" ~
     until curl --netrc -fs http://localhost:8080/api/v1/clusters; do
@@ -89,7 +78,7 @@ function blueprint_deploy {
     # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way. 
     sleep 600
 
-    while installation_status && [ $INSTALLATION_STATUS = "working" ] ;  do
+    while installation_status && [ $INSTALLATION_STATUS = "working" ] ; do
         echo $INSTALLATION_STATUS
         sleep 5
     done
@@ -147,8 +136,6 @@ localize_cluster_file
 initialize_blueprint
 
 kave_install
-
-patch_ipa
 
 wait_for_ambari
 
