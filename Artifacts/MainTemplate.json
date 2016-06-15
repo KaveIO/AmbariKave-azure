@@ -68,7 +68,7 @@
 		},
 		"CiNodeSize": {
 			"type": "string",
-			"defaultValue": "Standard_D2_v2"
+			"defaultValue": "Standard_D3_v2"
 		},
 		"NnoNodeName": {
 			"type": "string",
