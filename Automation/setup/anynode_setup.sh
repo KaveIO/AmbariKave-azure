@@ -30,10 +30,20 @@ function setup_repo {
 }
 
 function patch_yum {
+    set_archive_repo
+    set_v4_only
+}
+
+set_archive_repo() {
     #The 6.5 dirs were wiped out the default yum repo just this morning. Therefore we have to use the archive repo.
     local repodir=/etc/yum.repos.d
     rm $repodir/*
     cp "$AUTOMATION_DIR"/patch/CentOS-BaseArchive.repo $repodir
+}
+
+set_v4_only() {
+    #Not sure why is this but yum tries to use v6 pretty randomly. Last time I failed possibly because of this, let's just force v4.
+    echo "ip_resolve=4" >> /etc/yum.conf
 }
 
 function install_packages {
