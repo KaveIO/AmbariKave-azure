@@ -16,7 +16,7 @@ CLUSTER_NAME=${11:-cluster}
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
-    
+
     "$DIR/anynode_setup.sh" "$REPOSITORY" "$USER" "$PASS" "$DESTDIR" "$SWAP_SIZE" "$WORKING_DIR"
 }
 
@@ -74,21 +74,6 @@ function wait_for_ambari {
 
 function blueprint_deploy {
     $BIN_DIR/blueprint_deploy.sh "$VERSION" "${KAVE_BLUEPRINT%.*}" "${KAVE_CLUSTER%.*}" "$WORKING_DIR"
-
-    # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way. 
-    sleep 600
-
-    while installation_status && [ $INSTALLATION_STATUS = "working" ] ; do
-        echo $INSTALLATION_STATUS
-        sleep 5
-    done
-
-    if [ "$INSTALLATION_STATUS" = "done" ]; then
-       echo "No Criticals detected. The installation appears to be successful!"
-    else
-       echo "Installation loop broken, installation possibly failed. Exiting."
-       exit 255
-    fi
 }
 
 function installation_status {
@@ -121,6 +106,45 @@ function enable_kaveadmin {
 EOF"
 }
 
+function check_installation {
+    # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way.
+    while installation_status && [ $INSTALLATION_STATUS = "working" ] ; do
+	echo $INSTALLATION_STATUS
+	sleep 5
+    done
+
+    if [ "$INSTALLATION_STATUS" = "done" ]; then
+	echo "No Criticals detected. The installation appears to be successful!"
+    else
+	echo "Installation loop broken, installation possibly failed. Exiting."
+	exit 255
+    fi
+}
+
+function fix_freeipa_installation {
+    #The FreeIPA client installation may fail, among other things, because of TGT negotiation failure (https://fedorahosted.org/freeipa/ticket/4808). On the version we are now if this happens the installation is not retried. The idea is to check on all the nodes whether FreeIPA clients are good or not with a simple smoke test, then proceed to retry the installation. A lot of noise is involved, mainly because of Ambari's not-so-shiny API and Kave technicalities.
+    #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
+    local kinit_pass=$(cat /root/admin-password)
+    local pipe_hosts=$(echo "$CSV_HOSTS" | tr , '|')
+    until local failed_hosts=$(pdsh -w "$CSV_HOSTS" "echo $kinit_pass | kinit admin" 2>&1 >/dev/null | sed -nr "s/($pipe_hosts): kinit:.*/\1.`hostname -d`/p" | tr '\n' , | head -c -1); test -z $failed_hosts; do
+	local command='curl --netrc -H X-Requested-By:KoASetup -X'
+	local url="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/hosts/<HOST>/host_components/FREEIPA_CLIENT"
+	pdsh -w "$failed_hosts" "rm -f /root/ipa_client_install_lock_file; echo no | ipa-client-install --uninstall"
+	pdcp -w "$failed_hosts" /root/robot-admin-password /root
+	local target_hosts=($(echo $failed_hosts | tr , ' '))
+	local install_request='{"RequestInfo":{"context":"Install"},"Body":{"HostRoles":{"state":"INSTALLED"}}}'
+	local start_request=$(echo "$install_request" | sed -e "s/Install/Start/g" -e "s/INSTALLED/STARTED/g")
+	for host in ${target_hosts[@]}; do
+	    local host_url=$(echo $url | sed "s/<HOST>/$host/g")
+	    $command DELETE $host_url
+	    $command POST $host_url
+	    $command PUT -d "$install_request" $host_url
+	    $command PUT -d "$start_request" $host_url
+	done
+	sleep 120
+    done
+}
+
 anynode_setup
 
 csv_hosts
@@ -144,3 +168,7 @@ wait_for_ambari
 blueprint_deploy
 
 enable_kaveadmin
+
+check_installation
+
+fix_freeipa_installation
