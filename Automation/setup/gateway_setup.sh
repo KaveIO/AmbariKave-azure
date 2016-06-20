@@ -20,6 +20,7 @@ function extradisknode_setup {
 function post_installation {
     initialize_hdfs
     setup_vnc
+    setup_xrdp
 }
 
 initialize_hdfs() {
@@ -44,6 +45,13 @@ setup_vnc() {
     echo "VNCSERVERS=\"1:$USER\"" >> /etc/sysconfig/vncservers
     chkconfig vncserver on 
     service vncserver start 
+}
+
+setup_xrdp() {
+    yum install -y xrdp
+    sed -i "s/tsusers/$USER/" /etc/xrdp/sesman.ini
+    chkconfig xrdp on
+    service xrdp start
 }
 
 extradisknode_setup
