@@ -1,65 +1,58 @@
 #PATCH
 
-#Base archive repo file in place of the CentOS-Base.repo file whose repo site is discontinued.
+#This is to use the official CentOS repo instead of the CentOS-Base.repo file provided by OpenLogic whose repo site is discontinued.
 
-[archivebase]
+[officialbase]
 name=CentOS-$releasever - Base
-baseurl=http://vault.centos.org/6.5/os/x86_64
+baseurl=http://mirror.centos.org/centos-6/6/os/x86_64
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 
 #released updates
-[archiveupdates]
+[officialupdates]
 name=CentOS-$releasever - Updates
-baseurl=http://vault.centos.org/6.5/updates/x86_64
+baseurl=http://mirror.centos.org/centos-6/6/updates/x86_64
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 
 #additional packages that may be useful
-[archiveextras]
+[officialextras]
 name=CentOS-$releasever - Extras
-baseurl=http://vault.centos.org/6.5/extras/x86_64
+baseurl=http://mirror.centos.org/centos-6/6/extras/x86_64
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 
 #additional packages that extend functionality of existing packages
-[archivecentosplus]
+[officialcentosplus]
 name=CentOS-$releasever - Plus
-baseurl=http://vault.centos.org/6.5/centosplus/x86_64
+baseurl=http://mirror.centos.org/centos-6/6/centosplus/x86_64
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 
 #contrib - packages by Centos Users
-[archivecontrib]
+[officialcontrib]
 name=CentOS-$releasever - Contrib
-baseurl=http://vault.centos.org/6.5/contrib/x86_64
+baseurl=http://mirror.centos.org/centos-6/6/contrib/x86_64
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 
 #SCL
-[archivescl]
+[officialscl]
 name=CentOS-$releasever - scl
-baseurl=http://vault.centos.org/6.5/SCL/x86_64
+baseurl=http://mirror.centos.org/centos-6/6/sclo/x86_64/sclo
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 
 #CR
-[archivecr]
+[officialcr]
 name=CentOS-$releasever - cr
-baseurl=http://vault.centos.org/6.5/cr/x86_64
+baseurl=http://mirror.centos.org/centos-6/6/cr/x86_64
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 
 #Fasttrack
-[archivefasttrack]
+[officialfasttrack]
 name=CentOS-$releasever - fasstrack
-baseurl=http://vault.centos.org/6.5/fasttrack/x86_64
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#xen4
-[archivexen4]
-name=CentOS-$releasever - xen4
-baseurl=http://vault.centos.org/6.5/xen4/x86_64
+baseurl=http://mirror.centos.org/centos-6/6/fasttrack/x86_64
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6

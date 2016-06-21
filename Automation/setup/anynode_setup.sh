@@ -35,10 +35,10 @@ function patch_yum {
 }
 
 set_archive_repo() {
-    #The 6.5 dirs were wiped out the default yum repo just this morning. Therefore we have to use the archive repo.
+    #The 6.5 dirs were wiped out the default yum repo of OpenLogic, therefore we have to use the official repo. So yes 6.5 is still supported as the 6 branch still is, even if the latest-greatest is 6.8.
     local repodir=/etc/yum.repos.d
     rm $repodir/*
-    cp "$AUTOMATION_DIR"/patch/CentOS-BaseArchive.repo $repodir
+    cp "$AUTOMATION_DIR"/patch/CentOS-Official.repo $repodir
 }
 
 set_v4_only() {
