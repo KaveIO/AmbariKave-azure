@@ -4,7 +4,7 @@
   "parameters": {
     "basics": [
       {
-        "name": "KaveAdminUserName",
+        "name": "KAVEAdminUserName",
         "type": "Microsoft.Compute.UserNameTextBox",
         "label": "KAVE admin",
         "defaultValue": "",
@@ -58,7 +58,7 @@
               ]
             },
             "options": {
-              "hideExisting": false
+              "hideExisting": true
             },
             "visible": true
           },
@@ -77,7 +77,7 @@
               ]
             },
             "options": {
-              "hideExisting": false
+              "hideExisting": true
             },
             "visible": true
           }
@@ -93,16 +93,30 @@
         "bladeTitle": "DNS name label",
         "elements": [
           {
-            "name": "dnsLabelPrefix",
-            "type": "Microsoft.Common.TextBox",
-            "label": "DNS prefix",
-            "defaultValue": "",
-            "toolTip": "Unique DNS name prefix for the Public IP used to access the gateway. Your gateway FQDN is DNSPrefix.REGION_OF_RESOURCE_GROUP.cloudapp.azure.com. ",
+            "name": "dnsConfigName",
+            "type": "Microsoft.Network.PublicIpAddressCombo",
+            "label": {
+              "publicIpAddress": "Configure Public IP address",
+              "domainNameLabel": "Configure DNS prefix"
+            },
+            "toolTip": {
+              "publicIpAddress": "Choose name for the Public IP address",
+              "domainNameLabel": "An 'A record' that starts with the specified label and resolves to this public IP address will be registered with the Azure-provided DNS servers. Example: mylabel.westus.cloudapp.azure.com."
+            },
+            "defaultValue": {
+              "publicIpAddressName": "",
+              "domainNameLabel": ""
+            },
             "constraints": {
-              "required": true,
-              "regex": "^[a-z0-9A-Z]{3,12}$",
-              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 3-12 characters long."
-              },
+              "required": {
+                "domainNameLabel": true
+              }
+            },
+            "options": {
+              "hideNone": true,
+              "hideDomainNameLabel": false,
+              "hideExisting": false
+            },
             "visible": true
           }
         ]
@@ -111,9 +125,9 @@
     "outputs": {
       "KAVEAdminUserName": "[basics('KAVEAdminUserName')]",
       "KAVEAdminPassword": "[basics('KAVEAdminPassword').password]",
-      "saName": "[steps('storageConfig').saName]",
-      "saPremiumName": "[steps('storageConfig').saPremiumName]",
-      "dnsLabelPrefix": "[steps('dnsLabelPrefix')]"
+      "saName": "[steps('storageConfig').saName.name]",
+      "saPremiumName": "[steps('storageConfig').saPremiumName.name]",
+      "dnsLabelPrefix": "[steps('dnsConfig').dnsConfigName.domainNameLabel]"
     }
   }
 }
