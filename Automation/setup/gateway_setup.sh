@@ -56,5 +56,6 @@ setup_xrdp() {
 
 extradisknode_setup
 
-#Why in the background? The ambari node depends as a resource on the rest of the nodes. Whether for bug or feature, Azure waits for the creation of the dependent VMs, not for their setups, to complete. In case this behavior is corrected in the future, and this should be the case IMHO, this script will return and give the greenlight to the provision of the ambari node.
-post_installation &
+#Why should this be in the background? The ambari node depends as a resource on the rest of the nodes. Whether for bug or feature, Azure waits for the creation of the dependent VMs, not for their setups, to complete. In case this behavior is corrected in the future, and this should be the case IMHO, this script will return and give the greenlight to the provision of the ambari node.
+#Why it is not? Because actually Azure does not enforce dependency on the setup, plus we are sure that when the deployment on Azure is shown as Completed we are really ready to connect.
+post_installation

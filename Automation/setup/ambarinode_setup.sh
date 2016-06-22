@@ -112,7 +112,9 @@ function enable_kaveadmin {
         ipa user-mod kaveadmin --password<<EOF
         $PASS
         $PASS
-EOF"
+EOF" 
+    #Let the changes sink into the whole ipa cluster...
+    sleep 560
 }
 
 function check_installation {
@@ -133,8 +135,17 @@ function check_installation {
 function fix_freeipa_installation {
     #The FreeIPA client installation may fail, among other things, because of TGT negotiation failure (https://fedorahosted.org/freeipa/ticket/4808). On the version we are now if this happens the installation is not retried. The idea is to check on all the nodes whether FreeIPA clients are good or not with a simple smoke test, then proceed to retry the installation. A lot of noise is involved, mainly because of Ambari's not-so-shiny API and Kave technicalities.
     #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
-    local kinit_pass=$(cat /root/admin-password)
-    local pipe_hosts=$(echo "$CSV_HOSTS" | tr , '|')
+    #It is important anyway that we start to check after the installation has been tried at least once on all the nodes, so let's check for the locks and sleep for a while anyway.
+    sleep 500
+    count=50
+    local kinit_pass_file=/root/admin-password
+    until (pdsh -S -w "$CSV_HOSTS" "ls /root/ipa_client_install_lock_file" && ls $kinit_pass_file 2>&-) || test $count -eq 0; do
+	sleep 10
+	((count--))
+    done
+    sleep 500
+    local kinit_pass=$(cat $kinit_pass_file)
+    local pipe_hosts=$(echo "$CSV_HOSTS" | sed 's/localhost,\?//' | tr , '|')
     until local failed_hosts=$(pdsh -w "$CSV_HOSTS" "echo $kinit_pass | kinit admin" 2>&1 >/dev/null | sed -nr "s/($pipe_hosts): kinit:.*/\1.`hostname -d`/p" | tr '\n' , | head -c -1); test -z $failed_hosts; do
 	local command='curl --netrc -H X-Requested-By:KoASetup -X'
 	local url="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/hosts/<HOST>/host_components/FREEIPA_CLIENT"
@@ -146,11 +157,14 @@ function fix_freeipa_installation {
 	for host in ${target_hosts[@]}; do
 	    local host_url=$(echo $url | sed "s/<HOST>/$host/g")
 	    $command DELETE $host_url
+	    sleep 10
 	    $command POST $host_url
+	    sleep 10
 	    $command PUT -d "$install_request" $host_url
+	    sleep 10
 	    $command PUT -d "$start_request" $host_url
 	done
-	sleep 120
+	sleep 150
     done
 }
 
@@ -194,12 +208,12 @@ patch_ambari
 
 blueprint_deploy
 
-#enable_kaveadmin
-
 check_installation
 
 fix_freeipa_installation
 
 patch_hue
+
+enable_kaveadmin
 
 lock_root
