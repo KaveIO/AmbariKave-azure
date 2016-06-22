@@ -154,6 +154,18 @@ function fix_freeipa_installation {
     done
 }
 
+function patch_hue() {
+    #We want to be able to login as 'kaveadmin' in a PAM-enabled Hue, then we need to execute the server as root. It appears there is no way to arrange this in the configuration with the Hue version Ambari pulls so we have to amend the init.d script.
+    #To be fixed in Kave probably, anyway we have other authentication options. If we want to run hueserver as hue and not root then we need to change the password of the hue user.
+    local baseurl="http://localhost:8080/api/v1/clusters/cluster/services/HUE"
+    until curl --netrc -fs $baseurl; do
+	sleep 60
+	echo "Waiting until Hue is up and running..."
+    done
+    huenode=$(curl --netrc $baseurl/components/HUE_SERVER?fields=host_components/HostRoles/host_name | grep -w \"host_name\" | cut -d ":" -f 2-)
+    ssh $huenode "sed -i 's/USER=hue/USER=root/g' /etc/init.d/hue; service hue restart"
+}
+
 function lock_root {
     pdsh -w "$CSV_HOSTS" "chsh -s /sbin/nologin"
 }
@@ -182,10 +194,12 @@ patch_ambari
 
 blueprint_deploy
 
-enable_kaveadmin
+#enable_kaveadmin
 
 check_installation
 
 fix_freeipa_installation
+
+patch_hue
 
 lock_root
