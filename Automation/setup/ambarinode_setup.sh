@@ -154,6 +154,10 @@ function fix_freeipa_installation {
     done
 }
 
+function lock_root {
+    pdsh -w "$CSV_HOSTS" "chsh -s /sbin/nologin"
+}
+
 anynode_setup
 
 csv_hosts
@@ -183,3 +187,5 @@ enable_kaveadmin
 check_installation
 
 fix_freeipa_installation
+
+lock_root
