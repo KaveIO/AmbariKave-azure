@@ -72,6 +72,15 @@ function wait_for_ambari {
     done
 }
 
+function patch_ambari {
+    #The default service installation timeout is half an hour but if a component specifies a higher <timeout> this override is picked. Instead if it is smaller than the default is chosen. In order to be sure that our timeout is always the default for the install let's specify it to a value larger than all the <timeout>'s in the Kave metainfo's.
+    #See:
+    #https://issues.apache.org/jira/browse/AMBARI-9752
+    #https://issues.apache.org/jira/browse/AMBARI-8220
+    sed -i 's/agent.package.install.task.timeout=1800/agent.package.install.task.timeout=10000/' /etc/ambari-server/conf/ambari.properties
+    service ambari-server restart
+}
+
 function blueprint_deploy {
     $BIN_DIR/blueprint_deploy.sh "$VERSION" "${KAVE_BLUEPRINT%.*}" "${KAVE_CLUSTER%.*}" "$WORKING_DIR"
 }
@@ -164,6 +173,8 @@ initialize_blueprint
 kave_install
 
 wait_for_ambari
+
+patch_ambari
 
 blueprint_deploy
 
