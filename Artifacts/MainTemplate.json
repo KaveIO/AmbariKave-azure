@@ -673,7 +673,8 @@
 			"properties": {
 				"publisher": "Microsoft.OSTCExtensions",
 				"type": "CustomScriptForLinux",
-				"typeHandlerVersion": "1.4",
+				"typeHandlerVersion": "1.5",
+                                "autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('ambariNodeSetupURI')), ' ')]"
 				},
@@ -693,7 +694,8 @@
 			"properties": {
 				"publisher": "Microsoft.OSTCExtensions",
 				"type": "CustomScriptForLinux",
-				"typeHandlerVersion": "1.4",
+				"typeHandlerVersion": "1.5",
+                                "autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": "[split(concat(variables('extraDiskNodeSetupURI'),' ',variables('gatewaySetupURI'),' ',variables('anyNodeSetupURI')), ' ')]"
 				},
@@ -716,7 +718,8 @@
 			"properties": {
 				"publisher": "Microsoft.OSTCExtensions",
 				"type": "CustomScriptForLinux",
-				"typeHandlerVersion": "1.4",
+				"typeHandlerVersion": "1.5",
+                                "autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('extraDiskNodeSetupURI')), ' ')]"
 				},
@@ -739,7 +742,8 @@
 			"properties": {
 				"publisher": "Microsoft.OSTCExtensions",
 				"type": "CustomScriptForLinux",
-				"typeHandlerVersion": "1.4",
+				"typeHandlerVersion": "1.5",
+                                "autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]"
 				},
@@ -758,7 +762,8 @@
 			"properties": {
 				"publisher": "Microsoft.OSTCExtensions",
 				"type": "CustomScriptForLinux",
-				"typeHandlerVersion": "1.4",
+				"typeHandlerVersion": "1.5",
+				"autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": "[split(variables('anyNodeSetupURI'), ' ')]"
 				},
