@@ -464,6 +464,12 @@
 				"networkInterfaces": [{
 					"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('GatewayNicName'))]"
 				}]
+			},
+  			"diagnosticsProfile": {
+				"bootDiagnostics": {
+					"enabled": true,
+					"storageUri": "[concat('http://', parameters('saName'), '.blob.core.windows.net')]"
+				}
 			}
 		}
 		},{
@@ -507,7 +513,13 @@
 				"networkInterfaces": [{
 					"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('CiNicName'))]"
 				}]
-			}
+			},
+                        "diagnosticsProfile": {
+                                "bootDiagnostics": {
+                                        "enabled": true,
+                                        "storageUri": "[concat('http://', parameters('saName'), '.blob.core.windows.net')]"
+                                }
+                        }
 		}
 	}
 , {
@@ -555,7 +567,13 @@
 					"networkInterfaces": [{
 						"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('NnoNicName'),copyIndex()))]"
 					}]
-				}
+				},
+                        "diagnosticsProfile": {
+                                "bootDiagnostics": {
+                                        "enabled": true,
+                                        "storageUri": "[concat('http://', parameters('saName'), '.blob.core.windows.net')]"
+                                }
+                        }
 			}
 		}, {
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -612,7 +630,13 @@
 					"networkInterfaces": [{
 						"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('DataNicName'),copyIndex()))]"
 					}]
-				}
+				},
+                        "diagnosticsProfile": {
+                                "bootDiagnostics": {
+                                        "enabled": true,
+                                        "storageUri": "[concat('http://', parameters('saName'), '.blob.core.windows.net')]"
+                                }
+                        }
 			}
 		}, {
 			"name": "[parameters('AmbariNodeName')]",
@@ -660,7 +684,13 @@
 					"networkInterfaces": [{
 						"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('AmbariNicName'))]"
 					}]
-				}
+				},
+                        "diagnosticsProfile": {
+                                "bootDiagnostics": {
+                                        "enabled": true,
+                                        "storageUri": "[concat('http://', parameters('saName'), '.blob.core.windows.net')]"
+                                }
+                        }
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
