@@ -103,7 +103,7 @@ class RobotAdmin():
             p = subprocess.Popen(["hostname", "-f"], stdout=subprocess.PIPE)
             out, _ = p.communicate()
             hostname = out.strip()
-            options = ['--enable-dns-updates', '--ssh-trust-dns', '--domain', domain, '--hostname', hostname] if install_with_dns else ['--hostname', hostname]
+            options = ['--enable-dns-updates', '--ssh-trust-dns', '--domain', domain, '--hostname', hostname, '--force-join'] if install_with_dns else ['--hostname', hostname, '--force-join']
             #PATCH
 
             # Install the ipa-client software, This requires the robot-admin password.
