@@ -57,7 +57,7 @@ function localize_cluster_file {
 }
 
 function initialize_blueprint {
-    sed -r s/"<KAVE_ADMIN>"/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
+    sed -e s/"<KAVE_ADMIN>"/"$USER"/g -e s/"<KAVE_ADMIN_PASS>"/"$PASS"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
 }
 
 function kave_install {
@@ -168,7 +168,7 @@ function fix_freeipa_installation {
     done
 }
 
-function patch_hue() {
+function patch_hue {
     #We want to be able to login as 'kaveadmin' in a PAM-enabled Hue, then we need to execute the server as root. It appears there is no way to arrange this in the configuration with the Hue version Ambari pulls so we have to amend the init.d script.
     #To be fixed in Kave probably, anyway we have other authentication options. If we want to run hueserver as hue and not root then we need to change the password of the hue user.
     local baseurl="http://localhost:8080/api/v1/clusters/cluster/services/HUE"
