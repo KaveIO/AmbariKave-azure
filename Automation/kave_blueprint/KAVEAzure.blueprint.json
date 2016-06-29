@@ -89,6 +89,8 @@
 			"name": "FREEIPA_SERVER"
 		}, {
 			"name": "FREEIPA_CLIENT"
+		}, {
+		        "name": "HUE_SERVER"
 		}],
 		"cardinality": "1"
 	}, {
@@ -152,8 +154,6 @@
 			"name": "WEBHCAT_SERVER"
 		}, {
 			"name": "MYSQL_SERVER"
-		}, {
-			"name": "HUE_SERVER"
 		}, {
 			"name": "ZOOKEEPER_CLIENT"
 		}, {
