@@ -21,6 +21,7 @@ function post_installation {
     initialize_hdfs
     setup_vnc
     setup_xrdp
+    remove_gnomepackagekit
 }
 
 initialize_hdfs() {
@@ -52,6 +53,10 @@ setup_xrdp() {
     sed -i "s/tsusers/$USER/" /etc/xrdp/sesman.ini
     chkconfig xrdp on
     service xrdp start
+}
+
+remove_gnomepackagekit() {
+    yum remove -y PackageKit
 }
 
 extradisknode_setup
