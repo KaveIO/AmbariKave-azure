@@ -176,9 +176,9 @@ function lock_root {
 }
 
 function retry_ci_services {
-    #Statistically the ci nodes is giving problems, so we just run another round of installs. In principle this can be generalized to every node, even without hardcoding service and component names but rather picking them up from the services call
-    local services=(ARCHIVA JBOSS JENKINS SONARQUBE SONARQUBE TWIKI AMBARI_METRICS)
-    local components=(ARCHIVA_SERVER JBOSS_APP_SERVER JENKINS_MASTER SONARQUBE_MYSQL_SERVER SONARQUBE_SERVER TWIKI_SERVER METRICS_MONITOR)
+    #Statistically the ci nodes is giving problems, so we just run another round of installs. In principle this can be generalized to every node, even without hardcoding service and component names but rather picking them up from the services call. See also Rob's restart_all_services script.
+    local services=(ARCHIVA JBOSS JENKINS SONARQUBE SONARQUBE TWIKI AMBARI_METRICS GITLAB)
+    local components=(ARCHIVA_SERVER JBOSS_APP_SERVER JENKINS_MASTER SONARQUBE_MYSQL_SERVER SONARQUBE_SERVER TWIKI_SERVER METRICS_MONITOR GITLAB_SERVER)
     local command="$CURL_AUTH_COMMAND"
     local ci_host=$($command GET "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/components/ARCHIVA_SERVER?fields=host_components/HostRoles/host_name" | grep -w \"host_name\" | cut -d ":" -f 2- | tr -d \" | tr -d \ )
     local url="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/hosts/$ci_host/host_components/<COMPONENT>?"
@@ -229,7 +229,5 @@ check_installation
 fix_freeipa_installation
 
 enable_kaveadmin
-
-retry_ci_services
 
 lock_root
