@@ -14,6 +14,9 @@ SWAP_SIZE=${9:-10g}
 WORKING_DIR=${10:-/root/kavesetup}
 CLUSTER_NAME=${11:-cluster}
 
+CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
+SERVICES_URL="http://localhost:8080/api/v1/clusters/cluster/services"
+
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
 
@@ -102,7 +105,7 @@ function installation_status {
 }
 
 function enable_kaveadmin {
-    local baseurl="http://localhost:8080/api/v1/clusters/cluster/services/FREEIPA"
+    local baseurl=$SERVICES_URL/FREEIPA
     until curl --netrc -fs $baseurl | grep STARTED; do
         sleep 60
         echo "Waiting until FreeIPA is up and running..."
@@ -147,7 +150,7 @@ function fix_freeipa_installation {
     local kinit_pass=$(cat $kinit_pass_file)
     local pipe_hosts=$(echo "$CSV_HOSTS" | sed 's/localhost,\?//' | tr , '|')
     until local failed_hosts=$(pdsh -w "$CSV_HOSTS" "echo $kinit_pass | kinit admin" 2>&1 >/dev/null | sed -nr "s/($pipe_hosts): kinit:.*/\1.`hostname -d`/p" | tr '\n' , | head -c -1); test -z $failed_hosts; do
-	local command='curl --netrc -H X-Requested-By:KoASetup -X'
+	local command="$CURL_AUTH_COMMAND"
 	local url="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/hosts/<HOST>/host_components/FREEIPA_CLIENT"
 	pdsh -w "$failed_hosts" "rm -f /root/ipa_client_install_lock_file; echo no | ipa-client-install --uninstall"
 	pdcp -w "$failed_hosts" /root/robot-admin-password /root
@@ -160,9 +163,9 @@ function fix_freeipa_installation {
 	    sleep 10
 	    $command POST $host_url
 	    sleep 10
-	    $command PUT -d "$install_request" $host_url
+	    $command PUT -d "$install_request" "$host_url"
 	    sleep 10
-	    $command PUT -d "$start_request" $host_url
+	    $command PUT -d "$start_request" "$host_url"
 	done
 	sleep 150
     done
@@ -170,6 +173,31 @@ function fix_freeipa_installation {
 
 function lock_root {
     pdsh -w "$CSV_HOSTS" "chsh -s /sbin/nologin"
+}
+
+function retry_ci_services {
+    #Statistically the ci nodes is giving problems, so we just run another round of installs. In principle this can be generalized to every node, even without hardcoding service and component names but rather picking them up from the services call
+    local services=(ARCHIVA JBOSS JENKINS SONARQUBE SONARQUBE TWIKI AMBARI_METRICS)
+    local components=(ARCHIVA_SERVER JBOSS_APP_SERVER JENKINS_MASTER SONARQUBE_MYSQL_SERVER SONARQUBE_SERVER TWIKI_SERVER METRICS_MONITOR)
+    local command="$CURL_AUTH_COMMAND"
+    local ci_host=$($command GET "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/components/ARCHIVA_SERVER?fields=host_components/HostRoles/host_name" | grep -w \"host_name\" | cut -d ":" -f 2- | tr -d \" | tr -d \ )
+    local url="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/hosts/$ci_host/host_components/<COMPONENT>?"
+    local req='{"RequestInfo":{"context":"Start <SERVICE>","operation_level":{"level":"HOST_COMPONENT","cluster_name":"<CLUSTER_NAME>","host_name":"<CI_HOST>","service_name":"<SERVICE>"}},"Body":{"HostRoles":{"state":"<STATE>"}}}'
+    let "n=${#services[@]}-1"
+    for i in $(seq 0 $n); do
+	local service_arg=${services[$i]}
+	local component_arg=${components[$i]}
+	local service_url=$(echo $url | sed "s/<COMPONENT>/$component_arg/g")
+	local request=$(echo $req | sed -e "s/<SERVICE>/$service_arg/g" -e "s/<CLUSTER_NAME>/$CLUSTER_NAME/" -e "s/<CI_HOST>/$ci_host/")
+	local install_request=$(echo "$request" | sed 's/<STATE>/INSTALLED/')
+	local start_request=$(echo "$request" | sed 's/<STATE>/STARTED/')
+        if $command GET $SERVICES_URL/$service_arg | grep FAILED; then
+	    $command PUT -d "$install_request" "$service_url"
+	fi
+	if $command GET $SERVICES_URL/$service_arg | grep INSTALLED || test $service_arg = AMBARI_METRICS; then
+	    $command PUT -d "$start_request" "$service_url"
+	fi
+    done
 }
 
 anynode_setup
@@ -201,5 +229,7 @@ check_installation
 fix_freeipa_installation
 
 enable_kaveadmin
+
+retry_ci_services
 
 lock_root
