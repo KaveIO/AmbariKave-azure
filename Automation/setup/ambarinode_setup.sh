@@ -76,11 +76,8 @@ function wait_for_ambari {
 }
 
 function patch_ambari {
-    #The default service installation timeout is half an hour but if a component specifies a higher <timeout> this override is picked. Instead if it is smaller than the default is chosen. In order to be sure that our timeout is always the default for the install let's specify it to a value larger than all the <timeout>'s in the Kave metainfo's.
-    #See:
-    #https://issues.apache.org/jira/browse/AMBARI-9752
-    #https://issues.apache.org/jira/browse/AMBARI-8220
-    sed -i 's/agent.package.install.task.timeout=1800/agent.package.install.task.timeout=10000/' /etc/ambari-server/conf/ambari.properties
+    #The installation may just take too long on some nodes, the ci especially, therefore let's try to be even more generous on timeouts
+    sed -i -e 's/agent.package.install.task.timeout=1800/agent.package.install.task.timeout=3600/' -e 's/agent.task.timeout=900/agent.task.timeout=3600/' /etc/ambari-server/conf/ambari.properties
     service ambari-server restart
 }
 
@@ -173,31 +170,6 @@ function fix_freeipa_installation {
 
 function lock_root {
     pdsh -w "$CSV_HOSTS" "chsh -s /sbin/nologin"
-}
-
-function retry_ci_services {
-    #Statistically the ci nodes is giving problems, so we just run another round of installs. In principle this can be generalized to every node, even without hardcoding service and component names but rather picking them up from the services call. See also Rob's restart_all_services script.
-    local services=(ARCHIVA JBOSS JENKINS SONARQUBE SONARQUBE TWIKI AMBARI_METRICS GITLAB)
-    local components=(ARCHIVA_SERVER JBOSS_APP_SERVER JENKINS_MASTER SONARQUBE_MYSQL_SERVER SONARQUBE_SERVER TWIKI_SERVER METRICS_MONITOR GITLAB_SERVER)
-    local command="$CURL_AUTH_COMMAND"
-    local ci_host=$($command GET "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/components/ARCHIVA_SERVER?fields=host_components/HostRoles/host_name" | grep -w \"host_name\" | cut -d ":" -f 2- | tr -d \" | tr -d \ )
-    local url="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/hosts/$ci_host/host_components/<COMPONENT>?"
-    local req='{"RequestInfo":{"context":"Start <SERVICE>","operation_level":{"level":"HOST_COMPONENT","cluster_name":"<CLUSTER_NAME>","host_name":"<CI_HOST>","service_name":"<SERVICE>"}},"Body":{"HostRoles":{"state":"<STATE>"}}}'
-    let "n=${#services[@]}-1"
-    for i in $(seq 0 $n); do
-	local service_arg=${services[$i]}
-	local component_arg=${components[$i]}
-	local service_url=$(echo $url | sed "s/<COMPONENT>/$component_arg/g")
-	local request=$(echo $req | sed -e "s/<SERVICE>/$service_arg/g" -e "s/<CLUSTER_NAME>/$CLUSTER_NAME/" -e "s/<CI_HOST>/$ci_host/")
-	local install_request=$(echo "$request" | sed 's/<STATE>/INSTALLED/')
-	local start_request=$(echo "$request" | sed 's/<STATE>/STARTED/')
-        if $command GET $SERVICES_URL/$service_arg | grep FAILED; then
-	    $command PUT -d "$install_request" "$service_url"
-	fi
-	if $command GET $SERVICES_URL/$service_arg | grep INSTALLED || test $service_arg = AMBARI_METRICS; then
-	    $command PUT -d "$start_request" "$service_url"
-	fi
-    done
 }
 
 anynode_setup
