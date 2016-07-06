@@ -15,7 +15,7 @@ WORKING_DIR=${10:-/root/kavesetup}
 CLUSTER_NAME=${11:-cluster}
 
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
-SERVICES_URL="http://localhost:8080/api/v1/clusters/cluster/services"
+SERVICES_URL="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/services"
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -102,11 +102,7 @@ function installation_status {
 }
 
 function enable_kaveadmin {
-    local baseurl=$SERVICES_URL/FREEIPA
-    until curl --netrc -fs $baseurl | grep STARTED; do
-        sleep 60
-        echo "Waiting until FreeIPA is up and running..."
-    done
+    sleep 60
     cat /root/admin-password | su admin -c kinit admin
     su admin -c "
         ipa user-mod kaveadmin --password<<EOF
@@ -114,7 +110,7 @@ function enable_kaveadmin {
         $PASS
 EOF" 
     #Let the changes sink into the whole ipa cluster...
-    sleep 560
+    sleep 180
 }
 
 function check_installation {
