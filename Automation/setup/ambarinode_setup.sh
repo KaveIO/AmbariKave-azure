@@ -82,7 +82,9 @@ function patch_ambari {
 }
 
 function blueprint_deploy {
-    $BIN_DIR/blueprint_deploy.sh "$VERSION" "${KAVE_BLUEPRINT%.*}" "${KAVE_CLUSTER%.*}" "$WORKING_DIR"
+    #REST connection in deploy_from_blueprint.py failing for no reason...
+    local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
+    until $command; do sleep 10; done
 }
 
 function installation_status {
