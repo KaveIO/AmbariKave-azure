@@ -85,22 +85,20 @@ function patch_ambari {
 function blueprint_deploy {
     #REST connection in deploy_from_blueprint.py failing for no reason...
     local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
-    until $command; do sleep 10; done
+    until $command; do
+	echo "Blueprint installation failed, retrying..."
+	sleep 10
+    done
 }
 
-function installation_status {
-    local installation_status_message=$(curl --netrc "$CLUSTERS_URL/$CLUSTER_NAME/?fields=alerts_summary/*" 2> /dev/null)
-    local exit_status=$?
-    if [ $exit_status -ne 0 ]; then
-        return $exit_status
-    else
-        if [[ "$installation_status_message" =~ "\"CRITICAL\" : 0" ]]; then
-            INSTALLATION_STATUS="done"
-        else
-            INSTALLATION_STATUS="working"
-        fi
-        return 0
-    fi
+function wait_on_deploy {
+    #We start only after the regular blueprint deployment is done, and we are done when there are no running or scheduled requests.
+    sleep 900
+    local command="$CURL_AUTH_COMMAND"
+    while $command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | egrep "IN_PROGRESS|PENDING|QUEUED"; do
+	sleep 15
+	echo "Waiting for background tasks in Ambari to complete..."
+    done
 }
 
 function enable_kaveadmin {
@@ -115,39 +113,24 @@ EOF"
     sleep 180
 }
 
-function check_installation {
-    # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way.
-    while installation_status && [ $INSTALLATION_STATUS = "working" ] ; do
-	echo $INSTALLATION_STATUS
-	sleep 5
-    done
-
-    if [ "$INSTALLATION_STATUS" = "done" ]; then
-	echo "No Criticals detected. The installation appears to be successful!"
-    else
-	echo "Installation loop broken, installation possibly failed. Exiting."
-	exit 255
-    fi
-}
-
 function fix_freeipa_installation {
     #The FreeIPA client installation may fail, among other things, because of TGT negotiation failure (https://fedorahosted.org/freeipa/ticket/4808). On the version we are now if this happens the installation is not retried. The idea is to check on all the nodes whether FreeIPA clients are good or not with a simple smoke test, then proceed to retry the installation. A lot of noise is involved, mainly because of Ambari's not-so-shiny API and Kave technicalities.
     #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
     #It is important anyway that we start to check after the installation has been tried at least once on all the nodes, so let's check for the locks and sleep for a while anyway.
-    sleep 500
-    count=50
+    sleep 250
+    count=25
     local kinit_pass_file=/root/admin-password
-    until (pdsh -S -w "$CSV_HOSTS" "ls /root/ipa_client_install_lock_file" && ls $kinit_pass_file 2>&-) || test $count -eq 0; do
-	sleep 10
+    local ipainst_lock_file=/root/ipa_client_install_lock_file
+    until (pdsh -S -w "$CSV_HOSTS" "ls $ipainst_lock_file" && ls $kinit_pass_file 2>&-) || test $count -eq 0; do
+	sleep 5
 	((count--))
     done
-    sleep 500
     local kinit_pass=$(cat $kinit_pass_file)
     local pipe_hosts=$(echo "$CSV_HOSTS" | sed 's/localhost,\?//' | tr , '|')
     until local failed_hosts=$(pdsh -w "$CSV_HOSTS" "echo $kinit_pass | kinit admin" 2>&1 >/dev/null | sed -nr "s/($pipe_hosts): kinit:.*/\1.`hostname -d`/p" | tr '\n' , | head -c -1); test -z $failed_hosts; do
 	local command="$CURL_AUTH_COMMAND"
 	local url="$COMPONENTS_URL/FREEIPA_CLIENT"
-	pdsh -w "$failed_hosts" "rm -f /root/ipa_client_install_lock_file; echo no | ipa-client-install --uninstall"
+	pdsh -w "$failed_hosts" "rm -f $ipainst_lock_file; echo no | ipa-client-install --uninstall"
 	pdcp -w "$failed_hosts" /root/robot-admin-password /root
 	local target_hosts=($(echo $failed_hosts | tr , ' '))
 	local install_request='{"RequestInfo":{"context":"Install"},"Body":{"HostRoles":{"state":"INSTALLED"}}}'
@@ -167,10 +150,16 @@ function fix_freeipa_installation {
 }
 
 function activate_all_services {
+    for _ in `seq 1 5`; do
+	echo "Making sure all the services are active..."
+	activate_all_services_impl
+	sleep 180
+    done
+}
+
+activate_all_services_impl() {
     #Sometimes Ambari just fails starting some services, mostly on the ci. Let's install and start as needed.
-    #We start only after the regular installation is done.
-    local command="$CURL_AUTH_COMMAND"
-    while $command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" | grep PROGRESS; do sleep 120; done
+    local command=$CURL_AUTH_COMMAND
     for host in ${HOSTS[@]}; do
 	if [ $host = localhost ]; then continue; fi
 	local host=$host.`hostname -d`
@@ -186,12 +175,12 @@ function activate_all_services {
 		local operation_request=$(echo $operation_request_template | sed -e "s/<SERVICE>/$service/g" -e "s/<CLUSTER_NAME>/$CLUSTER_NAME/" -e "s/<HOST>/$host/")
 		local operation_url="$host_url/$component/?"
 		if [ $state = INSTALL_FAILED ]; then
-		    local actual_request=$(echo "$operation_request" | sed 's/<STATE>/INSTALLED/')
+		    local install_request=$(echo "$operation_request" | sed 's/<STATE>/INSTALLED/')
+		    $command PUT -d "$install_request" "$operation_url"
 		fi
-		if [ $state = INSTALLED ]; then
-		    local actual_request=$(echo "$operation_request" | sed 's/<STATE>/STARTED/')
-		fi
-		$command PUT -d "$actual_request" "$operation_url"
+		sleep 5
+		local start_request=$(echo "$operation_request" | sed 's/<STATE>/STARTED/')
+		$command PUT -d "$start_request" "$operation_url"
 	    fi
 	done
     done
@@ -225,7 +214,7 @@ patch_ambari
 
 blueprint_deploy
 
-check_installation
+wait_on_deploy
 
 fix_freeipa_installation
 
