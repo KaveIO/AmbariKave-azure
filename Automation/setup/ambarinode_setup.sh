@@ -15,7 +15,8 @@ WORKING_DIR=${10:-/root/kavesetup}
 CLUSTER_NAME=${11:-cluster}
 
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
-SERVICES_URL="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/services"
+CLUSTERS_URL="http://localhost:8080/api/v1/clusters"
+COMPONENTS_URL="$CLUSTERS_URL/$CLUSTER_NAME/hosts/<HOST>/host_components"
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -69,7 +70,7 @@ function kave_install {
 
 function wait_for_ambari {
     cp "$BIN_DIR/../.netrc" ~
-    until curl --netrc -fs http://localhost:8080/api/v1/clusters; do
+    until curl --netrc -fs $CLUSTERS_URL; do
 	sleep 60
 	echo "Waiting until ambari server is up and running..."
     done
@@ -88,9 +89,8 @@ function blueprint_deploy {
 }
 
 function installation_status {
-    local installation_status_message=$(curl --netrc "http://localhost:8080/api/v1/clusters/cluster/?fields=alerts_summary/*" 2> /dev/null)
+    local installation_status_message=$(curl --netrc "$CLUSTERS_URL/$CLUSTER_NAME/?fields=alerts_summary/*" 2> /dev/null)
     local exit_status=$?
-
     if [ $exit_status -ne 0 ]; then
         return $exit_status
     else
@@ -146,7 +146,7 @@ function fix_freeipa_installation {
     local pipe_hosts=$(echo "$CSV_HOSTS" | sed 's/localhost,\?//' | tr , '|')
     until local failed_hosts=$(pdsh -w "$CSV_HOSTS" "echo $kinit_pass | kinit admin" 2>&1 >/dev/null | sed -nr "s/($pipe_hosts): kinit:.*/\1.`hostname -d`/p" | tr '\n' , | head -c -1); test -z $failed_hosts; do
 	local command="$CURL_AUTH_COMMAND"
-	local url="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/hosts/<HOST>/host_components/FREEIPA_CLIENT"
+	local url="$COMPONENTS_URL/FREEIPA_CLIENT"
 	pdsh -w "$failed_hosts" "rm -f /root/ipa_client_install_lock_file; echo no | ipa-client-install --uninstall"
 	pdcp -w "$failed_hosts" /root/robot-admin-password /root
 	local target_hosts=($(echo $failed_hosts | tr , ' '))
@@ -163,6 +163,37 @@ function fix_freeipa_installation {
 	    $command PUT -d "$start_request" "$host_url"
 	done
 	sleep 150
+    done
+}
+
+function activate_all_services {
+    #Sometimes Ambari just fails starting some services, mostly on the ci. Let's install and start as needed.
+    #We start only after the regular installation is done.
+    local command="$CURL_AUTH_COMMAND"
+    while $command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" | grep PROGRESS; do sleep 120; done
+    for host in ${HOSTS[@]}; do
+	if [ $host = localhost ]; then continue; fi
+	local host=$host.`hostname -d`
+	local host_url=$(echo $COMPONENTS_URL | sed "s/<HOST>/$host/g")
+	local request="$command GET $host_url"
+	local components=($($request | grep "component_name" | awk -F '"' '{print $4}'))
+	for component in ${components[@]}; do
+	    local check_response=$($request/$component)
+            local state=$(echo "$check_response" | grep "\"state\" :" | awk -F '"' '{print $4}')
+	    if [[ $state =~ INSTALL* ]]; then
+		local service=$(echo "$check_response" | grep -m 1 "\"service_name\" :" | awk -F '"' '{print $4}')
+		local operation_request_template='{"RequestInfo":{"context":"Start <SERVICE>","operation_level":{"level":"HOST_COMPONENT","cluster_name":"<CLUSTER_NAME>","host_name":"<HOST>","service_name":"<SERVICE>"}},"Body":{"HostRoles":{"state":"<STATE>"}}}'
+		local operation_request=$(echo $operation_request_template | sed -e "s/<SERVICE>/$service/g" -e "s/<CLUSTER_NAME>/$CLUSTER_NAME/" -e "s/<HOST>/$host/")
+		local operation_url="$host_url/$component/?"
+		if [ $state = INSTALL_FAILED ]; then
+		    local actual_request=$(echo "$operation_request" | sed 's/<STATE>/INSTALLED/')
+		fi
+		if [ $state = INSTALLED ]; then
+		    local actual_request=$(echo "$operation_request" | sed 's/<STATE>/STARTED/')
+		fi
+		$command PUT -d "$actual_request" "$operation_url"
+	    fi
+	done
     done
 }
 
@@ -199,5 +230,7 @@ check_installation
 fix_freeipa_installation
 
 enable_kaveadmin
+
+activate_all_services
 
 lock_root
