@@ -70,20 +70,6 @@ function change_rootpass {
     echo root:$PASS | chpasswd
 }
 
-function configure_swap {
-    local swapfile=/mnt/resource/swap$SWAP_SIZE
-
-    fallocate -l "$SWAP_SIZE" "$swapfile"
-
-    chmod 600 "$swapfile"
-
-    mkswap "$swapfile"
-
-    swapon "$swapfile"
-
-    echo -e "$swapfile\tnone\tswap\tsw\t0\t0" >> /etc/fstab
-}
-
 function disable_iptables {
     #The deploy_from_blueprint KAVE script performs a number of commands on the cluster hosts. Among these, it reads like iptables is stopped, but not permanently. It must be off as otherwise, at least a priori, the FreeIPA clients cannot talk to eachother. We want these changes to be permanent in the (remote) case that the system goes down or is rebooted - otherwise KAVE will stop working afterwards.
     #To be fixed in KAVE
@@ -107,8 +93,6 @@ install_packages
 patch_ipa
 
 change_rootpass
-
-configure_swap
 
 disable_iptables
 
