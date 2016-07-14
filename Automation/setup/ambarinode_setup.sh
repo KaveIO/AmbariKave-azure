@@ -153,7 +153,7 @@ function activate_all_services {
     for _ in `seq 1 5`; do
 	echo "Making sure all the services are active..."
 	activate_all_services_impl
-	sleep 180
+	sleep 90
     done
 }
 
