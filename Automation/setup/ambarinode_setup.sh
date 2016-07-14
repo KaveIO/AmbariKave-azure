@@ -149,11 +149,16 @@ function fix_freeipa_installation {
     done
 }
 
-function activate_all_services {
+function post_installation {
+	activate_all_services
+	lock_root
+}
+
+activate_all_services() {
     for _ in `seq 1 5`; do
-	echo "Making sure all the services are active..."
-	activate_all_services_impl
-	sleep 90
+		echo "Making sure all the services are active..."
+		activate_all_services_impl
+		sleep 90
     done
 }
 
@@ -186,7 +191,7 @@ activate_all_services_impl() {
     done
 }
 
-function lock_root {
+lock_root() {
     pdsh -w "$CSV_HOSTS" "chsh -s /sbin/nologin"
 }
 
@@ -220,6 +225,4 @@ fix_freeipa_installation
 
 enable_kaveadmin
 
-activate_all_services
-
-lock_root
+post_installation &
