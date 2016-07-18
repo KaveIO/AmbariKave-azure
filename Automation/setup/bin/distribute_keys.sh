@@ -13,6 +13,6 @@ echo StrictHostKeyChecking$'\t'no > ~/.ssh/config
 
 #For some unknown reason a sshpass may fail; let's retry ad nauseam
 for NODE in $@; do
-    until sshpass -p "$PASS" ssh-copy-id -i "$key" root@"$NODE"; do sleep 150; done
+    until sshpass -p "$PASS" ssh-copy-id -i "$key" root@"$NODE"; do sleep 60; done
 done
 

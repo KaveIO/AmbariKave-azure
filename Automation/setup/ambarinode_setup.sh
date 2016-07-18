@@ -93,7 +93,7 @@ function blueprint_deploy {
 
 function wait_on_deploy {
     #We start only after the regular blueprint deployment is done, and we are done when there are no running or scheduled requests.
-    sleep 900
+    sleep 300
     local command="$CURL_AUTH_COMMAND"
     while $command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | egrep "IN_PROGRESS|PENDING|QUEUED"; do
 	sleep 15
@@ -110,15 +110,15 @@ function enable_kaveadmin {
         $PASS
 EOF" 
     #Let the changes sink into the whole ipa cluster...
-    sleep 180
+    sleep 120
 }
 
 function fix_freeipa_installation {
     #The FreeIPA client installation may fail, among other things, because of TGT negotiation failure (https://fedorahosted.org/freeipa/ticket/4808). On the version we are now if this happens the installation is not retried. The idea is to check on all the nodes whether FreeIPA clients are good or not with a simple smoke test, then proceed to retry the installation. A lot of noise is involved, mainly because of Ambari's not-so-shiny API and Kave technicalities.
     #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
     #It is important anyway that we start to check after the installation has been tried at least once on all the nodes, so let's check for the locks and sleep for a while anyway.
-    sleep 250
-    count=25
+    sleep 120
+    count=10
     local kinit_pass_file=/root/admin-password
     local ipainst_lock_file=/root/ipa_client_install_lock_file
     until (pdsh -S -w "$CSV_HOSTS" "ls $ipainst_lock_file" && ls $kinit_pass_file 2>&-) || test $count -eq 0; do
@@ -145,7 +145,7 @@ function fix_freeipa_installation {
 	    sleep 10
 	    $command PUT -d "$start_request" "$host_url"
 	done
-	sleep 150
+	sleep 120
     done
 }
 
