@@ -118,12 +118,12 @@ function fix_freeipa_installation {
     #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
     #It is important anyway that we start to check after the installation has been tried at least once on all the nodes, so let's check for the locks and sleep for a while anyway.
     sleep 120
-    count=10
+    count=5
     local kinit_pass_file=/root/admin-password
     local ipainst_lock_file=/root/ipa_client_install_lock_file
     until (pdsh -S -w "$CSV_HOSTS" "ls $ipainst_lock_file" && ls $kinit_pass_file 2>&-) || test $count -eq 0; do
-	sleep 5
-	((count--))
+		sleep 5
+		((count--))
     done
     local kinit_pass=$(cat $kinit_pass_file)
     local pipe_hosts=$(echo "$CSV_HOSTS" | sed 's/localhost,\?//' | tr , '|')
@@ -158,7 +158,7 @@ activate_all_services() {
     for _ in `seq 1 5`; do
 		echo "Making sure all the services are active..."
 		activate_all_services_impl
-		sleep 90
+		sleep 45
     done
 }
 
