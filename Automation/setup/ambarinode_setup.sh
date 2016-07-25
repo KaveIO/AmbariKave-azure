@@ -105,7 +105,7 @@ function enable_kaveadmin {
     sleep 60
     cat /root/admin-password | su admin -c kinit admin
     su admin -c "
-        ipa user-mod kaveadmin --password<<EOF
+        ipa user-mod $USER --password<<EOF
         $PASS
         $PASS
 EOF" 
