@@ -12,7 +12,7 @@ function patch_kave {
     cp "$WORKING_DIR"/contents/Automation/patch/freeipa.py "$WORKING_DIR"/AmbariKave-$VERSION/src/HDP/2.4.KAVE/services/FREEIPA/package/scripts
 }
 
-wget "https://github.com/KaveIO/AmbariKave/archive/$VERSION.zip" -O "$WORKING_DIR/$VERSION.zip"
+wget --tries=10 --read-timeout=60 "https://github.com/KaveIO/AmbariKave/archive/$VERSION.zip" -O "$WORKING_DIR/$VERSION.zip"
 
 unzip "$WORKING_DIR/$VERSION.zip" -d "$WORKING_DIR"
 

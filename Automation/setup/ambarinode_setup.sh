@@ -33,9 +33,9 @@ function download_blueprint {
     local blueprint_filename=blueprint$extension
     local cluster_filename="$CLUSTER_NAME"$extension
     
-    wget -O "$WORKING_DIR/$blueprint_filename" "$KAVE_BLUEPRINT_URL"
+    wget --tries=10 --read-timeout=60 -O "$WORKING_DIR/$blueprint_filename" "$KAVE_BLUEPRINT_URL"
 
-    wget -O "$WORKING_DIR/$cluster_filename" "$KAVE_CLUSTER_URL"
+    wget --tries=10 --read-timeout=60 -O "$WORKING_DIR/$cluster_filename" "$KAVE_CLUSTER_URL"
 
     KAVE_BLUEPRINT=$(readlink -e "$WORKING_DIR/$blueprint_filename")
 

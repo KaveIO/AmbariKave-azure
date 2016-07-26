@@ -14,7 +14,7 @@ function setup_repo {
     
     mkdir -p "$WORKING_DIR"
     
-    wget -O "$WORKING_DIR/scripts.zip" "$REPOSITORY"
+    wget --tries=10 --read-timeout=60 -O "$WORKING_DIR/scripts.zip" "$REPOSITORY"
 
     unzip -d "$WORKING_DIR/temp" "$WORKING_DIR/scripts.zip" 
 
