@@ -91,14 +91,27 @@ function blueprint_deploy {
     done
 }
 
-function wait_on_deploy {
+function wait_on_deploy() {
+	until wait_on_deploy_impl; do
+		echo "Ambari tasks taking too long, restarting the Ambari cluster..."
+		service ambari-server restart
+		sleep 120
+		pdsh -w "$CSV_HOSTS" "service ambari-agent restart"
+		sleep 120
+	done
+}
+
+wait_on_deploy_impl() {
     #We start only after the regular blueprint deployment is done, and we are done when there are no running or scheduled requests.
     sleep 300
     local command="$CURL_AUTH_COMMAND"
-    while $command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | egrep "IN_PROGRESS|PENDING|QUEUED"; do
-	sleep 15
-	echo "Waiting for background tasks in Ambari to complete..."
+    local count=150
+    while ($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | egrep "IN_PROGRESS|PENDING|QUEUED") && test $count -ne 0; do
+    		((count--))
+		sleep 15
+		echo "Waiting for background tasks in Ambari to complete..."
     done
+    test $count -ne 0
 }
 
 function enable_kaveadmin {

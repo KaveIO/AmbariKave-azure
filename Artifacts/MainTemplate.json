@@ -95,7 +95,7 @@
         "KAVEImageOffer": "CentOS",
         "Comment1": "If you change the node modify the \"nodes\" variable below too",
         "AmbariNodeName": "ambari",
-        "GatewayNodeName": "gateway",
+        "GatewayNodeName": "gate",
         "CiNodeName": "ci",
         "NnoNodeName": "nno",
         "DataNodeName": "data",
