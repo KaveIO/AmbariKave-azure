@@ -12,11 +12,9 @@ function download_kave {
 
 	local artifact="$WORKING_DIR/$VERSION.zip"
 
-	until	
-		wget --tries=10 --read-timeout=60 "https://github.com/KaveIO/AmbariKave/archive/$VERSION.zip" -O "$artifact"
-		local download_md5=$(md5sum "$artifact" | cut -d' ' -f1)
-		test $ARTIFACT_MD5 = $download_md5
-	do sleep 10; done
+	wget --tries=30 --read-timeout=60 "https://github.com/KaveIO/AmbariKave/archive/$VERSION.zip" -O "$artifact"
+	local download_md5=$(md5sum "$artifact" | cut -d' ' -f1)
+	test $ARTIFACT_MD5 = $download_md5
 
 	unzip "$artifact" -d "$WORKING_DIR"
 

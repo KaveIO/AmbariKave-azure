@@ -18,6 +18,8 @@ CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
 CLUSTERS_URL="http://localhost:8080/api/v1/clusters"
 COMPONENTS_URL="$CLUSTERS_URL/$CLUSTER_NAME/hosts/<HOST>/host_components"
 
+BLUEPRINT_TRIALS=5
+
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
 
@@ -71,8 +73,8 @@ function kave_install {
 function wait_for_ambari {
     cp "$BIN_DIR/../.netrc" ~
     until curl --netrc -fs $CLUSTERS_URL; do
-	sleep 60
-	echo "Waiting until ambari server is up and running..."
+		sleep 60
+		echo "Waiting until ambari server is up and running..."
     done
 }
 
@@ -83,12 +85,37 @@ function patch_ambari {
 }
 
 function blueprint_deploy {
-    #REST connection in deploy_from_blueprint.py failing for no reason...
+    #REST connection in deploy_from_blueprint.py can fail, so keep trying till success is reached
     local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
-    until $command; do
-	echo "Blueprint installation failed, retrying..."
-	sleep 10
+    # try for a while(), then backup plan
+    local count=5
+
+    while $command && test $count -ne 0; do 
+		((count--))
+		echo "Blueprint installation failed, retrying..."
+		echo "DEBUG: count="$count
+		sleep 15
     done
+    # try to re-install ambari in case deployment was not successful
+    if [ $count -eq 0 ] && [ $BLUEPRINT_TRIALS -ne 0 ]; then
+		((BLUEPRINT_TRIALS--))
+		echo "Blueprint deployment unsucessful. Reinstalling ambari server and retrying the deployment..."
+		echo $BLUEPRINT_TRIALS" deployment trials remaining"
+		#clean.sh is meant for the server, let's just run the two client commands separately 
+		pdsh -w "$CSV_HOSTS" "service ambari-agent stop; yum -y erase ambari-agent"
+		cd "$WORKING_DIR/AmbariKave-$VERSION"
+		echo "y" | dev/clean.sh 
+		kave_install
+		blueprint_deploy
+	else
+	    if [ $BLUEPRINT_TRIALS -ne 0 ]; then
+		    echo "Blueprint deployment successful!"
+		    return 0
+		else
+		    	(>&2 echo "It was not possible to deploy requested blueprint on your cluster. Please check if all machines in your cluster are running normally...")
+		    	return 3
+		fi
+	fi
 }
 
 function wait_on_deploy() {
@@ -127,6 +154,8 @@ EOF"
 }
 
 function fix_freeipa_installation {
+	local retries=30
+	local failed=false
     #The FreeIPA client installation may fail, among other things, because of TGT negotiation failure (https://fedorahosted.org/freeipa/ticket/4808). On the version we are now if this happens the installation is not retried. The idea is to check on all the nodes whether FreeIPA clients are good or not with a simple smoke test, then proceed to retry the installation. A lot of noise is involved, mainly because of Ambari's not-so-shiny API and Kave technicalities.
     #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
     #It is important anyway that we start to check after the installation has been tried at least once on all the nodes, so let's check for the locks and sleep for a while anyway.
@@ -141,25 +170,33 @@ function fix_freeipa_installation {
     local kinit_pass=$(cat $kinit_pass_file)
     local pipe_hosts=$(echo "$CSV_HOSTS" | sed 's/localhost,\?//' | tr , '|')
     until local failed_hosts=$(pdsh -w "$CSV_HOSTS" "echo $kinit_pass | kinit admin" 2>&1 >/dev/null | sed -nr "s/($pipe_hosts): kinit:.*/\1.`hostname -d`/p" | tr '\n' , | head -c -1); test -z $failed_hosts; do
-	local command="$CURL_AUTH_COMMAND"
-	local url="$COMPONENTS_URL/FREEIPA_CLIENT"
-	pdsh -w "$failed_hosts" "rm -f $ipainst_lock_file; echo no | ipa-client-install --uninstall"
-	pdcp -w "$failed_hosts" /root/robot-admin-password /root
-	local target_hosts=($(echo $failed_hosts | tr , ' '))
-	local install_request='{"RequestInfo":{"context":"Install"},"Body":{"HostRoles":{"state":"INSTALLED"}}}'
-	local start_request=$(echo "$install_request" | sed -e "s/Install/Start/g" -e "s/INSTALLED/STARTED/g")
-	for host in ${target_hosts[@]}; do
-	    local host_url=$(echo $url | sed "s/<HOST>/$host/g")
-	    $command DELETE $host_url
-	    sleep 10
-	    $command POST $host_url
-	    sleep 10
-	    $command PUT -d "$install_request" "$host_url"
-	    sleep 10
-	    $command PUT -d "$start_request" "$host_url"
-	done
-	sleep 120
+		if [ $retries -eq 0 ]; then
+			(>&2 echo "FreeIPA reinstall retries exceeded, you will have to install the IPA client yourself on the following nodes: '$failed_hosts'. Skipping...")
+			failed=true
+			break
+		fi
+		((retries--))
+		local command="$CURL_AUTH_COMMAND"
+		local url="$COMPONENTS_URL/FREEIPA_CLIENT"
+		pdsh -w "$failed_hosts" "rm -f $ipainst_lock_file; echo no | ipa-client-install --uninstall"
+		pdcp -w "$failed_hosts" /root/robot-admin-password /root
+		local target_hosts=($(echo $failed_hosts | tr , ' '))
+		local install_request='{"RequestInfo":{"context":"Install"},"Body":{"HostRoles":{"state":"INSTALLED"}}}'
+		local start_request=$(echo "$install_request" | sed -e "s/Install/Start/g" -e "s/INSTALLED/STARTED/g")
+		for host in ${target_hosts[@]}; do
+		    local host_url=$(echo $url | sed "s/<HOST>/$host/g")
+		    $command DELETE $host_url
+		    sleep 10
+		    $command POST $host_url
+		    sleep 10
+		    $command PUT -d "$install_request" "$host_url"
+		    sleep 10
+		    $command PUT -d "$start_request" "$host_url"
+		done
+		sleep 120
     done
+    if $failed; then return 3; fi
+	return 0
 }
 
 function post_installation {
