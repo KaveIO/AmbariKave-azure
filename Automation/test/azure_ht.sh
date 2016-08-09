@@ -12,8 +12,6 @@ CLUSTER_NAME=${9:-cluster}
 AMBARI_USER=${10:-admin}
 AMBARI_PASS=${11:-$AMBARI_USER}
 
-#https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-connect/#comment-2812368170
-
 azure config mode arm 
 
 old_htrg=$(azure group list | grep -o "$PREFIX[0-9]*")
