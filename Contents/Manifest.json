@@ -16,13 +16,13 @@
     {
       "name": "MainTemplate",
       "type": "Template",
-      "path": "Artifacts\\MainTemplate.json",
+      "path": "Artifacts\\mainTemplate.json",
       "isDefault": true
     },
     {
       "name": "CreateUiDefinition",
       "type": "Custom",
-      "path": "Artifacts\\CreateUiDefinition.json",
+      "path": "Artifacts\\createUiDefinition.json",
       "isDefault": false
     },
   ],
