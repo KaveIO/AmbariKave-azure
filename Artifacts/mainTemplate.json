@@ -119,7 +119,7 @@
         "publicIPAddressName": "KAVEPublicIP",
         "publicIPAddressType": "Static",
         "extensionName": "/setup",
-        "branchName": "master",
+        "branchName": "release-0.0.5",
         "contentHost": "raw.githubusercontent.com",
         "mainHost": "github.com",
         "pathURI": "/KaveIO/AmbariKave-azure/",
