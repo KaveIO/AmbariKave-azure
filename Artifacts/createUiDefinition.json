@@ -5,7 +5,7 @@
     "basics": [
       {
         "name": "KAVEAdminUserName",
-        "type": "Microsoft.Compute.UserNameTextBox",
+        "type": "Microsoft.Common.TextBox",
         "label": "KAVE admin",
         "defaultValue": "",
         "toolTip": "Enter a KAVE admin user name.",
@@ -14,23 +14,25 @@
           "regex": "^[a-z]{6,32}$",
           "validationMessage": "The user name must be between 6 and 32 characters long, and can contain only lowercase letters."
         },
-        "osPlatform": "Linux",
         "visible": true
       },
       {
         "name": "KAVEAdminPassword",
-        "type": "Microsoft.Compute.CredentialsCombo",
+        "type": "Microsoft.Common.PasswordBox",
         "label": {
           "password": "Password",
           "confirmPassword": "Confirm password"
         },
-        "toolTip": {
-          "password": "Enter a KAVE admin password. "
-        },
-        "osPlatform": "Windows",
+        "toolTip": "Enter a KAVE admin password.",
         "constraints": {
-          "required": true
-        }
+          "required": true,
+          "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
+          "validationMessage": "The password should be at least 12 characters long and must fullfil 3 of the 4 following requirements: At least 1 lower case letter, 1 capital letter, 1 digit and 1 special character."
+        },
+        "options": {
+          "hideConfirmation": false
+        },
+        "visible": true
       }
     ],
     "steps": [
@@ -120,11 +122,64 @@
             "visible": true
           }
         ]
+      },
+      {
+        "name": "VM Config",
+        "label": "Virtual machines",
+        "subLabel": {
+          "preValidation": "Configure nodes",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "VM settings",
+        "elements": [
+          {
+            "name": "clusterVmSize2",
+            "type": "Microsoft.Compute.SizeSelector",
+            "label": "Virtual machine size",
+            "toolTip": "The size of the Gateway, Ambari, Name, Continuous Integration",
+            "recommendedSizes": [
+              "Standard_D4_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_D4_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "OpenLogic",
+              "offer": "CentOS",
+              "sku": "6.5"
+            },
+            "count": "5"
+          },
+          {
+            "name": "clusterVmSize3",
+            "type": "Microsoft.Compute.SizeSelector",
+            "label": "Virtual machine size",
+            "toolTip": "The size of the Datanodes",
+            "recommendedSizes": [
+              "Standard_DS4_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_DS4_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "OpenLogic",
+              "offer": "CentOS",
+              "sku": "6.5"
+            },
+            "count": "3"
+          }
+        ]
       }
     ],
     "outputs": {
       "KAVEAdminUserName": "[basics('KAVEAdminUserName')]",
-      "KAVEAdminPassword": "[basics('KAVEAdminPassword').password]",
+      "KAVEAdminPassword": "[basics('KAVEAdminPassword')]",
       "saName": "[steps('storageConfig').saName.name]",
       "saPremiumName": "[steps('storageConfig').saPremiumName.name]",
       "dnsLabelPrefix": "[steps('dnsConfig').dnsConfigName.domainNameLabel]"
