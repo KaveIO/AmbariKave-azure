@@ -4,10 +4,11 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 RELEASE=${1:-release-$(date +%Y-%m-%d)}
 
-TEMPLATE=Artifacts/mainTemplate.json
+TEMPLATE="$DIR/../Artifacts/mainTemplate.json"
 
 git checkout -b $RELEASE
-sed -i s/master/$RELEASE/g $TEMPLATE
+echo "Warning, assuming BSD sed, remove '' for GNU"
+sed -i '' s/master/$RELEASE/g $TEMPLATE
 
 git add $TEMPLATE
 git commit -m "Tied the code in the release branch to the release branch."
