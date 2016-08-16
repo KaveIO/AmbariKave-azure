@@ -21,4 +21,5 @@ git push origin refs/tags/$RELEASE
 
 git checkout master
 
-zip "$DIR"/kave_on_azure-$RELEASE.zip "$DIR"/../Artifacts/*
+cd "$DIR"/../Artifacts/
+zip "$DIR"/kave_on_azure-$RELEASE.zip *
