@@ -19,7 +19,7 @@ git branch --set-upstream-to=origin/$RELEASE $RELEASE
 git tag $RELEASE
 git push origin refs/tags/$RELEASE
 
-git checkout master
-
 cd "$DIR"/../Artifacts/
 zip "$DIR"/kave_on_azure-$RELEASE.zip *
+
+git checkout master
