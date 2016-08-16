@@ -114,8 +114,7 @@
         "KAVEStdStorageType": "Standard_LRS",
         "KAVEPrmStorageType": "Premium_LRS",
         "KAVEStdStorageKind": "Storage",
-        "KAVEPrmStorageKind": "BlobStorage",
-        "KAVEPrmStorageAccessTier": "Cool",
+        "KAVEPrmStorageKind": "Storage",
         "publicIPAddressName": "KAVEPublicIP",
         "publicIPAddressType": "Static",
         "extensionName": "/setup",
@@ -170,9 +169,6 @@
             "location": "[variables('location')]",
             "apiVersion": "[variables('apiVersionStorage')]",
             "dependsOn": [],
-            "properties": {
-                "accessTier": "[variables('KAVEPrmStorageAccessTier')]"
-            },
             "tags": {
                 "displayName": "saKAVE01Premium"
             },
