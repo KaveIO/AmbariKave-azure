@@ -216,28 +216,30 @@ activate_all_services_impl() {
     #Sometimes Ambari just fails starting some services, mostly on the ci. Let's install and start as needed.
     local command=$CURL_AUTH_COMMAND
     for host in ${HOSTS[@]}; do
-	if [ $host = localhost ]; then continue; fi
-	local host=$host.`hostname -d`
-	local host_url=$(echo $COMPONENTS_URL | sed "s/<HOST>/$host/g")
-	local request="$command GET $host_url"
-	local components=($($request | grep "component_name" | awk -F '"' '{print $4}'))
-	for component in ${components[@]}; do
-	    local check_response=$($request/$component)
-            local state=$(echo "$check_response" | grep "\"state\" :" | awk -F '"' '{print $4}')
-	    if [[ $state =~ INSTALL* ]]; then
-		local service=$(echo "$check_response" | grep -m 1 "\"service_name\" :" | awk -F '"' '{print $4}')
-		local operation_request_template='{"RequestInfo":{"context":"Start <SERVICE>","operation_level":{"level":"HOST_COMPONENT","cluster_name":"<CLUSTER_NAME>","host_name":"<HOST>","service_name":"<SERVICE>"}},"Body":{"HostRoles":{"state":"<STATE>"}}}'
-		local operation_request=$(echo $operation_request_template | sed -e "s/<SERVICE>/$service/g" -e "s/<CLUSTER_NAME>/$CLUSTER_NAME/" -e "s/<HOST>/$host/")
-		local operation_url="$host_url/$component/?"
-		if [ $state = INSTALL_FAILED ]; then
-		    local install_request=$(echo "$operation_request" | sed 's/<STATE>/INSTALLED/')
-		    $command PUT -d "$install_request" "$operation_url"
-		fi
-		sleep 5
-		local start_request=$(echo "$operation_request" | sed 's/<STATE>/STARTED/')
-		$command PUT -d "$start_request" "$operation_url"
-	    fi
-	done
+		if [ $host = localhost ]; then continue; fi
+		local host=$host.`hostname -d`
+		local host_url=$(echo $COMPONENTS_URL | sed "s/<HOST>/$host/g")
+		local request="$command GET $host_url"
+		local components=($($request | grep "component_name" | awk -F '"' '{print $4}'))
+		for component in ${components[@]}; do
+		    local check_response=$($request/$component)
+	        local state=$(echo "$check_response" | grep "\"state\" :" | awk -F '"' '{print $4}')
+		    if [ $state = INSTALLED -o $state = INSTALL_FAILED ]; then
+				local service=$(echo "$check_response" | grep -m 1 "\"service_name\" :" | awk -F '"' '{print $4}')
+				local operation_request_template='{"RequestInfo":{"context":"Start <SERVICE>","operation_level":{"level":"HOST_COMPONENT","cluster_name":"<CLUSTER_NAME>","host_name":"<HOST>","service_name":"<SERVICE>"}},"Body":{"HostRoles":{"state":"<STATE>"}}}'
+				local operation_request=$(echo $operation_request_template | sed -e "s/<SERVICE>/$service/g" -e "s/<CLUSTER_NAME>/$CLUSTER_NAME/" -e "s/<HOST>/$host/")
+				local operation_url="$host_url/$component/?"
+				#Fixed in KAVE 2.1
+				if [[ $service = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "rm -rf /opt/archiva; rm -rf /etc/init.d/archiva"; fi
+				if [ $state = INSTALL_FAILED ]; then
+			    		local install_request=$(echo "$operation_request" | sed 's/<STATE>/INSTALLED/')
+			    		$command PUT -d "$install_request" "$operation_url"
+				fi
+				sleep 5
+				local start_request=$(echo "$operation_request" | sed 's/<STATE>/STARTED/')
+				$command PUT -d "$start_request" "$operation_url"
+		    fi
+		done
     done
 }
 
