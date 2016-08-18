@@ -48,8 +48,8 @@
 			"mapreduce.map.java.opts": "-Xmx7372m",
 			"mapreduce.reduce.java.opts": "-Xmx7372m",
 			"yarn.app.mapreduce.am.resource.mb": "9216",
-			"yarn.app.mapreduce.am.command-opts": "-Xmx7372",
-			"mapreduce.task.io.sort.mb": "3686"
+			"yarn.app.mapreduce.am.command-opts": "-Xmx7372m",
+			"mapreduce.task.io.sort.mb": "2047"
 		}
 	}, {
 		"freeipa": {
