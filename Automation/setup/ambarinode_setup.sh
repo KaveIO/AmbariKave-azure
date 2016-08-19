@@ -70,12 +70,23 @@ function kave_install {
     $BIN_DIR/kave_install.sh "$VERSION" "$WORKING_DIR"
 }
 
+clean() {
+	echo "y" | "$WORKING_DIR/AmbariKave-$VERSION/dev/clean.sh" 
+}
+
 function wait_for_ambari {
     cp "$BIN_DIR/../.netrc" ~
-    until curl --netrc -fs $CLUSTERS_URL; do
+    local count=5
+    until curl --netrc -fs $CLUSTERS_URL || test $count -eq 0; do
+    		((count--))
 		sleep 60
 		echo "Waiting until ambari server is up and running..."
     done
+    if [ $count -eq 0 ]; then 
+		clean
+    		kave_install
+    		wait_for_ambari
+    	fi
 }
 
 function patch_ambari {
@@ -103,8 +114,7 @@ function blueprint_deploy {
 		echo $BLUEPRINT_TRIALS" deployment trials remaining"
 		#clean.sh is meant for the server, let's just run the two client commands separately 
 		pdsh -w "$CSV_HOSTS" "service ambari-agent stop; yum -y erase ambari-agent"
-		cd "$WORKING_DIR/AmbariKave-$VERSION"
-		echo "y" | dev/clean.sh 
+		clean
 		kave_install
 		blueprint_deploy
 	else

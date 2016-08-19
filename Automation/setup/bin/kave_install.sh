@@ -16,7 +16,7 @@ function download_kave {
 	local download_md5=$(md5sum "$artifact" | cut -d' ' -f1)
 	test $ARTIFACT_MD5 = $download_md5
 
-	unzip "$artifact" -d "$WORKING_DIR"
+	unzip -o "$artifact" -d "$WORKING_DIR"
 
 }
 
