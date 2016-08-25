@@ -77,7 +77,7 @@ clean() {
 function wait_for_ambari {
     cp "$BIN_DIR/../.netrc" ~
     local count=5
-    until curl --netrc -fs $CLUSTERS_URL || test $count -eq 0; do
+    while ! (curl --netrc -fs $CLUSTERS_URL) && test $count -ne 0; do
     		((count--))
 		sleep 60
 		echo "Waiting until ambari server is up and running..."
@@ -101,7 +101,7 @@ function blueprint_deploy {
     # try for a while(), then backup plan
     local count=5
 
-    while $command && test $count -ne 0; do 
+    while ! ($command) && test $count -ne 0; do 
 		((count--))
 		echo "Blueprint installation failed, retrying..."
 		echo "DEBUG: count="$count
@@ -173,7 +173,7 @@ function fix_freeipa_installation {
     count=5
     local kinit_pass_file=/root/admin-password
     local ipainst_lock_file=/root/ipa_client_install_lock_file
-    until (pdsh -S -w "$CSV_HOSTS" "ls $ipainst_lock_file" && ls $kinit_pass_file 2>&-) || test $count -eq 0; do
+    while ! (pdsh -S -w "$CSV_HOSTS" "ls $ipainst_lock_file" && ls $kinit_pass_file 2>&-) && test $count -ne 0; do
 		sleep 5
 		((count--))
     done
