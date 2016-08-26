@@ -25,7 +25,6 @@ function post_installation {
 }
 
 setup_vnc() {
-	yum install -y vnc-server
 	until which vncserver 2>&- && which vncpasswd 2>&-; do sleep 5; done
     local vncdir=/home/"$USER"/.vnc
     local vncpasswd=$vncdir/passwd
