@@ -240,13 +240,15 @@ activate_all_services_impl() {
 				local operation_request_template='{"RequestInfo":{"context":"Start <SERVICE>","operation_level":{"level":"HOST_COMPONENT","cluster_name":"<CLUSTER_NAME>","host_name":"<HOST>","service_name":"<SERVICE>"}},"Body":{"HostRoles":{"state":"<STATE>"}}}'
 				local operation_request=$(echo $operation_request_template | sed -e "s/<SERVICE>/$service/g" -e "s/<CLUSTER_NAME>/$CLUSTER_NAME/" -e "s/<HOST>/$host/")
 				local operation_url="$host_url/$component/?"
-				#Fixed in KAVE 2.1
-				if [[ $service = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "rm -rf /opt/archiva; rm -rf /etc/init.d/archiva"; fi
 				if [ $state = INSTALL_FAILED ]; then
+					#Fixed in KAVE 2.1
+					if [[ $service = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "rm -rf /opt/archiva; rm -rf /etc/init.d/archiva"; fi
 			    		local install_request=$(echo "$operation_request" | sed 's/<STATE>/INSTALLED/')
 			    		$command PUT -d "$install_request" "$operation_url"
 				fi
 				sleep 5
+				#Not sure about this, probably a bug in Archiva/Ambari
+				if [[ $service = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "mkdir -p /opt/archiva/conf"; fi
 				local start_request=$(echo "$operation_request" | sed 's/<STATE>/STARTED/')
 				$command PUT -d "$start_request" "$operation_url"
 		    fi
