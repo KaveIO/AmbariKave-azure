@@ -28,5 +28,5 @@ for NODE in $@; do
 	done
 done
 
-if $failed; then return 3; fi
-return 0
+if $failed; then exit 3; fi
+exit 0

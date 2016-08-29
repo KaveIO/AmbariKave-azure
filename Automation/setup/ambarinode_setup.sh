@@ -139,11 +139,12 @@ function wait_on_deploy() {
 }
 
 wait_on_deploy_impl() {
-    #We start only after the regular blueprint deployment is done, and we are done when there are no running or scheduled requests.
+#We proceed as soon as FreeIPA is installed, waiting for all tasks takes too much time, which means timeouts in Azure. FreeIPA only because that is the component we possibly fix manually in the code
+#below. For the rest of the services, we do retry to install them if their installation status requires so, which is not the case when it is INSTALLING.
     sleep 300
     local command="$CURL_AUTH_COMMAND"
     local count=150
-    while ($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | egrep "IN_PROGRESS|PENDING|QUEUED") && test $count -ne 0; do
+    while ($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | grep -10 FREEIPA | egrep "IN_PROGRESS|PENDING|QUEUED") && test $count -ne 0; do
     		((count--))
 		sleep 15
 		echo "Waiting for background tasks in Ambari to complete..."

@@ -31,7 +31,8 @@ function setup_repo {
 
 function patch_yum {
     set_archive_repo
-    set_v4_only
+    amend_yum_conf
+    use_fast_mirrors
 }
 
 set_archive_repo() {
@@ -41,9 +42,18 @@ set_archive_repo() {
     cp "$AUTOMATION_DIR"/patch/CentOS-Official.repo $repodir
 }
 
-set_v4_only() {
-    #Not sure why is this but yum tries to use v6 pretty randomly. Last time I failed possibly because of this, let's just force v4.
+amend_yum_conf() {
+    #Not sure why is this but yum tries to use v6 pretty randomly - once I failed possibly because of this, let's just force v4. Also, let's just try forever to install a package - if an install
+    #does not happen we are in trouble anyway.
     echo "ip_resolve=4" >> /etc/yum.conf
+    echo "retries=0" >> /etc/yum.conf
+}
+
+use_fast_mirrors() {
+	yum install -y yum-plugin-fastestmirror
+	local plugindir=/etc/yum/pluginconf.d/
+	mkdir -p $plugindir
+	cp "$AUTOMATION_DIR"/patch/fastestmirror.conf $plugindir
 }
 
 function install_packages {
