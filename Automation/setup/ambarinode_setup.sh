@@ -216,10 +216,10 @@ function post_installation {
 }
 
 activate_all_services() {
-    for _ in `seq 1 5`; do
-    	 echo "Making sure all the services are active..."
-	 activate_all_services_impl
-	 sleep 45
+    for _ in `seq 1 15`; do
+    		echo "Making sure all the services are active..."
+		activate_all_services_impl
+		sleep 45
     done
 }
 
