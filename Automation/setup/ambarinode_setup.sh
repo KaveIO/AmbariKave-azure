@@ -128,7 +128,7 @@ function blueprint_deploy {
 	fi
 }
 
-function wait_on_deploy() {
+function wait_on_deploy {
 	until wait_on_deploy_impl; do
 		echo "Ambari tasks taking too long, restarting the Ambari cluster..."
 		service ambari-server restart
@@ -141,6 +141,7 @@ function wait_on_deploy() {
 wait_on_deploy_impl() {
 #We proceed as soon as FreeIPA is installed, waiting for all tasks takes too much time, which means timeouts in Azure. FreeIPA only because that is the component we possibly fix manually in the code
 #below. For the rest of the services, we do retry to install them if their installation status requires so, which is not the case when it is INSTALLING.
+#We consider the cluster to be ready for connections when KaveLanding, so VNC, is installed too, but that is waited on by the gateway setup.	
     sleep 300
     local command="$CURL_AUTH_COMMAND"
     local count=150
@@ -152,7 +153,7 @@ wait_on_deploy_impl() {
     test $count -ne 0
 }
 
-function enable_kaveadmin {
+enable_kaveadmin() {
     sleep 60
     cat /root/admin-password | su admin -c kinit admin
     su admin -c "
@@ -164,12 +165,13 @@ EOF"
     sleep 120
 }
 
-function fix_freeipa_installation {
+fix_freeipa_installation() {
 	local retries=30
 	local failed=false
     #The FreeIPA client installation may fail, among other things, because of TGT negotiation failure (https://fedorahosted.org/freeipa/ticket/4808). On the version we are now if this happens the installation is not retried. The idea is to check on all the nodes whether FreeIPA clients are good or not with a simple smoke test, then proceed to retry the installation. A lot of noise is involved, mainly because of Ambari's not-so-shiny API and Kave technicalities.
     #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
     #It is important anyway that we start to check after the installation has been tried at least once on all the nodes, so let's check for the locks and sleep for a while anyway.
+	#This approach sacrifices control in the name of failure rates, but Azure could definitely expose a customizable CSE timeout, or at least offer a way for us to say Don't terminate me, I'm still working hard.
     sleep 120
     count=5
     local kinit_pass_file=/root/admin-password
@@ -211,6 +213,8 @@ function fix_freeipa_installation {
 }
 
 function post_installation {
+	fix_freeipa_installation
+	enable_kaveadmin
 	activate_all_services
 	lock_root
 }
@@ -285,9 +289,5 @@ patch_ambari
 blueprint_deploy
 
 wait_on_deploy
-
-fix_freeipa_installation
-
-enable_kaveadmin
 
 post_installation &
