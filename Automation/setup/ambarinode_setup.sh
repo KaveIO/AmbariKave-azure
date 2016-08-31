@@ -166,7 +166,7 @@ EOF"
 }
 
 fix_freeipa_installation() {
-	local retries=30
+	local retries=5
 	local failed=false
     #The FreeIPA client installation may fail, among other things, because of TGT negotiation failure (https://fedorahosted.org/freeipa/ticket/4808). On the version we are now if this happens the installation is not retried. The idea is to check on all the nodes whether FreeIPA clients are good or not with a simple smoke test, then proceed to retry the installation. A lot of noise is involved, mainly because of Ambari's not-so-shiny API and Kave technicalities.
     #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
@@ -199,14 +199,14 @@ fix_freeipa_installation() {
 		for host in ${target_hosts[@]}; do
 		    local host_url=$(echo $url | sed "s/<HOST>/$host/g")
 		    $command DELETE $host_url
-		    sleep 10
+		    sleep 5
 		    $command POST $host_url
-		    sleep 10
+		    sleep 5
 		    $command PUT -d "$install_request" "$host_url"
-		    sleep 10
+		    sleep 5
 		    $command PUT -d "$start_request" "$host_url"
 		done
-		sleep 120
+		sleep 50
     done
     if $failed; then return 3; fi
 	return 0
