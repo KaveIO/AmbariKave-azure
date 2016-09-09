@@ -30,16 +30,19 @@ function setup_repo {
 }
 
 function patch_yum {
-    set_archive_repo
+	configure_yum_repos
     amend_yum_conf
     use_fast_mirrors
 }
 
-set_archive_repo() {
+configure_yum_repos() {
     #The 6.5 dirs were wiped out the default yum repo of OpenLogic, therefore we have to use the official repo. So yes 6.5 is still supported as the 6 branch still is, even if the latest-greatest is 6.8.
     local repodir=/etc/yum.repos.d
     rm $repodir/*
     cp "$AUTOMATION_DIR"/patch/CentOS-Official.repo $repodir
+	#Appearently the Mongo repo has changed too, but since this is to be fixed in KAVE, let's just add the new repo with a higher priority
+    yum install -y yum-plugin-priorities
+    cp "$AUTOMATION_DIR"/patch/mongodb.new.repo $repodir 
 }
 
 amend_yum_conf() {
