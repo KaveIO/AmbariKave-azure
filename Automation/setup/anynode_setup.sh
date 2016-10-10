@@ -42,7 +42,9 @@ configure_yum_repos() {
     cp "$AUTOMATION_DIR"/patch/CentOS-Official.repo $repodir
 	#Appearently the Mongo repo has changed too, but since this is to be fixed in KAVE, let's just add the new repo with a higher priority
     yum install -y yum-plugin-priorities
-    cp "$AUTOMATION_DIR"/patch/mongodb.new.repo $repodir 
+    cp "$AUTOMATION_DIR"/patch/mongodb.new.repo $repodir
+    #This is needed because the Mongo Ambari service install drops the file if not there
+    touch $repodir/mongodb.repo
 }
 
 amend_yum_conf() {
