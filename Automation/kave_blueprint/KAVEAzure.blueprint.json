@@ -13,7 +13,9 @@
 			"hadoop.proxyuser.hue.hosts": "*",
 			"hadoop.proxyuser.hue.groups": "*",
 			"hadoop.proxyuser.hcat.groups": "*",
-			"hadoop.proxyuser.hcat.hosts": "*"
+			"hadoop.proxyuser.hcat.hosts": "*",
+			"hadoop.proxyuser.root.hosts": "*",
+			"hadoop.proxyuser.root.groups": "*"
 		}
 	}, {
 		"webhcat-site": {
